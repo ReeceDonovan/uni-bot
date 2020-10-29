@@ -28,12 +28,12 @@ func main() {
 	exitError(config.InitConfig())
 
 	// Discord connection
-	token := viper.GetString("discord.token")
-	session, err := discordgo.New("Bot " + token)
+	// token := viper.GetString("discord.token")
+	session, err := discordgo.New("Bot " + viper.GetString("discord.token"))
 	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
 	// Open websocket
-	// err = session.Open()
+	err = session.Open()
 	// commands.Register(session)
 	// exitError(err)
 	// Maintain connection until a SIGTERM, then cleanly exit
