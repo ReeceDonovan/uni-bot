@@ -32,7 +32,10 @@ func main() {
 	session, err := discordgo.New("Bot " + token)
 	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
-
+	// Open websocket
+	err = session.Open()
+	// commands.Register(session)
+	exitError(err)
 	// Maintain connection until a SIGTERM, then cleanly exit
 	log.Info("Bot is Running")
 	sc := make(chan os.Signal, 1)
