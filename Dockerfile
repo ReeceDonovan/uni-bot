@@ -24,7 +24,7 @@ WORKDIR /bin
 
 COPY --from=dev /go/bin/CS-bot ./CS-bot
 
-EXPOSE 2112
+# EXPOSE 2112
 
 
 CMD ["sh", "-c", "CS-bot -p"]
