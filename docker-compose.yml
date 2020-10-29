@@ -5,7 +5,8 @@ services:
     # command: modd # Hot reloading
     build: .
     ports:
-      - 8888:80
+      - 80:80
+      - 8888:8888
     ## Vars to put in override:
     environment:
       - DISCORD_TOKEN="${DISCORD_TOKEN}"
