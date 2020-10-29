@@ -4,10 +4,10 @@ services:
     container_name: CS-bot.local
     # command: modd # Hot reloading
     build: .
-    ports:
-      - 8888:80
+    # ports:
+    #   - 8888:80
     ## Vars to put in override:
     environment:
       - DISCORD_TOKEN="${DISCORD_TOKEN}"
     volumes:
-      - /bot
+      - /mnt/d/UCC/Side_Projects/CS-bot:/bot
