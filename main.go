@@ -28,9 +28,9 @@ func main() {
 	exitError(config.InitConfig())
 
 	// Discord connection
-	// token := viper.GetString("discord.token")
-	session, err := discordgo.New("Bot " + viper.GetString("discord.token"))
-	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+	token := viper.GetString("discord.token")
+	session, err := discordgo.New("Bot " + token)
+	// session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
 	// Open websocket
 	err = session.Open()
