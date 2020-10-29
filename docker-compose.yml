@@ -10,4 +10,4 @@ services:
     environment:
       - DISCORD_TOKEN="${DISCORD_TOKEN}"
     volumes:
-      - /bot
+      - /mnt/d/UCC/Side_Projects/CS-bot:/bot
