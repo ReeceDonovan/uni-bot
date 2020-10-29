@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  discord-bot:
+    container_name: CS-bot.local
+    command: modd # Hot reloading
+    build: .
+    ports:
+      - 8888:80
+    ## Vars to put in override:
+    environment:
+      - DISCORD_TOKEN="${DISCORD}"
+    volumes:
+      - /bot
