@@ -1,9 +1,18 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"io/ioutil"
+	"log"
+
+	"github.com/spf13/viper"
+)
 
 func initDefaults() {
-	viper.SetDefault("discord.token", "")
+	content, err := ioutil.ReadFile("token.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	viper.SetDefault("discord.token", string(content))
 	// Bot
 	viper.SetDefault("bot.prefix", ";")
 	viper.SetDefault("bot.quote.default_message_weight", 1)
