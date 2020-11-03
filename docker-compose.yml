@@ -8,6 +8,6 @@ services:
       - 8888:80
     ## Vars to put in override:
     environment:
-      - DISCORD_TOKEN="${DISCORD_TOKEN}"
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
     volumes:
       - /mnt/d/UCC/Side_Projects/CS-bot:/bot
