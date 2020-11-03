@@ -30,6 +30,7 @@ func main() {
 	// Discord connection
 	token := viper.GetString("discord.token")
 	session, err := discordgo.New("Bot " + token)
+
 	// session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
 	// Open websocket
