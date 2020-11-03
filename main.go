@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,9 +29,8 @@ func main() {
 
 	// Discord connection
 	token := viper.GetString("discord.token")
-	fmt.Println(token)
 	session, err := discordgo.New("Bot " + token)
-
+	log.Info(token)
 	// session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
 	// Open websocket
