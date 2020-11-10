@@ -2,7 +2,7 @@ package api
 
 import "time"
 
-type courseData []struct {
+type CourseData []struct {
 	ID                   int         `json:"id"`
 	Name                 string      `json:"name"`
 	AccountID            int         `json:"account_id"`
@@ -51,7 +51,7 @@ type courseData []struct {
 	OverriddenCourseVisibility       string `json:"overridden_course_visibility"`
 }
 
-type assignmentData []struct {
+type AssignmentData []struct {
 	ID                              int         `json:"id"`
 	Description                     string      `json:"description"`
 	DueAt                           time.Time   `json:"due_at"`

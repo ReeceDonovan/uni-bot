@@ -21,8 +21,6 @@ var (
 	cachedC *cache.Cache
 	cachedA *cache.Cache
 	session *discordgo.Session
-	cdata   *courseData
-	adata   *assignmentData
 )
 
 func Run(s *discordgo.Session) {
@@ -33,6 +31,7 @@ func Run(s *discordgo.Session) {
 }
 
 func QueryCourse() []ParsedCourse {
+	var cdata CourseData
 
 	parsedC := []ParsedCourse{}
 
@@ -56,7 +55,7 @@ func QueryCourse() []ParsedCourse {
 		if jsonErr != nil {
 			log.Fatal(jsonErr)
 		}
-		for _, c := range *cdata {
+		for _, c := range cdata {
 			if c.CreatedAt.Unix() > time.Now().AddDate(-1, 0, 0).Unix() {
 				parsedC = append(parsedC, ParsedCourse{
 					c.ID,
@@ -71,6 +70,7 @@ func QueryCourse() []ParsedCourse {
 }
 
 func QueryAssign(c string) []ParsedAssignment {
+	var adata AssignmentData
 
 	parsedA := []ParsedAssignment{}
 
@@ -96,7 +96,7 @@ func QueryAssign(c string) []ParsedAssignment {
 			log.Fatal(jsonErr)
 		}
 
-		for _, a := range *adata {
+		for _, a := range adata {
 			if a.DueAt.Unix() > time.Now().AddDate(0, 0, 0).Unix() {
 				parsedA = append(parsedA, ParsedAssignment{
 					a.ID,
