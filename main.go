@@ -2,14 +2,19 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	"github.com/ReeceDonovan/CS-bot/config"
 	"github.com/Strum355/log"
 	"github.com/bwmarrin/discordgo"
+	"github.com/reecedonovan/CS-bot/api"
+	"github.com/reecedonovan/CS-bot/commands"
+	"github.com/reecedonovan/CS-bot/config"
+	"github.com/spf13/viper"
+
+	"github.com/go-co-op/gocron"
 )
 
 var production *bool
@@ -26,24 +31,30 @@ func main() {
 
 	// Setup viper and consul
 	exitError(config.InitConfig())
-
-	content, err := ioutil.ReadFile("token.txt")
-
 	// Discord connection
-	// token := viper.GetString("discord.token")
-	session, err := discordgo.New("Bot " + string(content))
+	token := viper.GetString("discord.token")
+	// fmt.Println(token)
+	session, err := discordgo.New("Bot " + token)
 	// session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
 	// Open websocket
 	err = session.Open()
-	// commands.Register(session)
+	commands.Register(session)
 	exitError(err)
+
+	go api.Run(session)
+
+	scheduler := gocron.NewScheduler(time.UTC)
+	scheduler.StartAsync()
+	// scheduler.Every(10).Second().Do(commands.RefeshSchedule, scheduler, session)
+
 	// Maintain connection until a SIGTERM, then cleanly exit
 	log.Info("Bot is Running")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 	log.Info("Cleanly exiting")
+	scheduler.Stop()
 	session.Close()
 }
 
