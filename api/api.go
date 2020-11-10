@@ -80,7 +80,7 @@ func QueryAssign(c string) []ParsedAssignment {
 		parsedA = cachedAssignments.([]ParsedAssignment)
 		fmt.Println("Cache found")
 	} else {
-		qURL = viper.GetString("canvas.aURL.0") + c + viper.GetString("canvas.aURL.1") + viper.GetString("canvas.token")
+		qURL = viper.GetString("canvas.aURL0") + c + viper.GetString("canvas.aURL1") + viper.GetString("canvas.token")
 		res, err := http.Get(qURL)
 		if err != nil {
 			log.Fatal(err)

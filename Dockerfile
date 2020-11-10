@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 
-RUN go install github.com/ReeceDonovan/CS-bot
+RUN go install github.com/reecedonovan/CS-bot
 
 CMD [ "go", "run", "*.go" ]
 
