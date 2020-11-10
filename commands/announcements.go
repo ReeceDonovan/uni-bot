@@ -37,7 +37,9 @@ func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.
 		// 	"guild_id":   "DM",
 		// })
 		fmt.Println(m.Content)
-		token = m.Content
+		if m.Content != "" {
+			token = m.Content
+		}
 	}
 	AnnounceAssignments(s, m.ChannelID, token)
 }
