@@ -33,7 +33,6 @@ func main() {
 	exitError(config.InitConfig())
 	// Discord connection
 	token := viper.GetString("discord.token")
-	// fmt.Println(token)
 	session, err := discordgo.New("Bot " + token)
 	// session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)

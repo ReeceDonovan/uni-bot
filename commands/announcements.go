@@ -11,6 +11,7 @@ import (
 
 func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
 	schedule.Clear()
+	// TODO:
 	// AnnounceAssignments(s)
 	// api.QueryCourse()
 

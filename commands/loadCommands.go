@@ -27,7 +27,6 @@ func Register(s *discordgo.Session) {
 		AnnounceMsgHandler,
 	)
 	s.AddHandler(messageCreate)
-
 }
 
 // Called whenever a message is sent in a server the bot has access to
