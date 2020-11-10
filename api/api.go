@@ -24,13 +24,13 @@ var (
 )
 
 func Run(s *discordgo.Session) {
-	cachedC = cache.New(6*time.Hour, 6*time.Hour)
-	cachedA = cache.New(6*time.Hour, 6*time.Hour)
+	cachedC = cache.New(1*time.Minute, 1*time.Minute)
+	cachedA = cache.New(1*time.Minute, 1*time.Minute)
 
 	session = s
 }
 
-func QueryCourse() []ParsedCourse {
+func QueryCourse(token string) []ParsedCourse {
 	var cdata CourseData
 
 	parsedC := []ParsedCourse{}
@@ -42,7 +42,7 @@ func QueryCourse() []ParsedCourse {
 		fmt.Println("Cache found")
 	} else {
 		fmt.Println("Cache created")
-		qURL = viper.GetString("canvas.cURL") + viper.GetString("canvas.token")
+		qURL = viper.GetString("canvas.cURL") + token
 		res, err := http.Get(qURL)
 		if err != nil {
 			log.Fatal(err)
@@ -69,7 +69,7 @@ func QueryCourse() []ParsedCourse {
 	return parsedC
 }
 
-func QueryAssign(c string) []ParsedAssignment {
+func QueryAssign(c string, token string) []ParsedAssignment {
 	var adata AssignmentData
 
 	parsedA := []ParsedAssignment{}
@@ -80,7 +80,7 @@ func QueryAssign(c string) []ParsedAssignment {
 		parsedA = cachedAssignments.([]ParsedAssignment)
 		fmt.Println("Cache found")
 	} else {
-		qURL = viper.GetString("canvas.aURLs") + c + viper.GetString("canvas.aURLe") + viper.GetString("canvas.token")
+		qURL = viper.GetString("canvas.aURLs") + c + viper.GetString("canvas.aURLe") + token
 		res, err := http.Get(qURL)
 		if err != nil {
 			log.Fatal(err)
@@ -107,6 +107,7 @@ func QueryAssign(c string) []ParsedAssignment {
 				})
 			}
 		}
+		cachedA.Set("assignments", parsedA, cache.DefaultExpiration)
 	}
 	return parsedA
 }
