@@ -9,5 +9,6 @@ services:
     ## Vars to put in override:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - CANVAS_TOKEN=${CANVAS_API_TOKEN}
     volumes:
       - /mnt/d/UCC/Side_Projects/CS-bot:/bot
