@@ -21,6 +21,8 @@ var (
 	cachedC *cache.Cache
 	cachedA *cache.Cache
 	session *discordgo.Session
+	cdata   courseData
+	adata   assignmentData
 )
 
 func Run(s *discordgo.Session) {
@@ -31,7 +33,6 @@ func Run(s *discordgo.Session) {
 }
 
 func QueryCourse() []ParsedCourse {
-	var cdata courseData
 
 	parsedC := []ParsedCourse{}
 
@@ -70,7 +71,6 @@ func QueryCourse() []ParsedCourse {
 }
 
 func QueryAssign(c string) []ParsedAssignment {
-	var adata assignmentData
 
 	parsedA := []ParsedAssignment{}
 
@@ -80,7 +80,7 @@ func QueryAssign(c string) []ParsedAssignment {
 		parsedA = cachedAssignments.([]ParsedAssignment)
 		fmt.Println("Cache found")
 	} else {
-		qURL = viper.GetString("canvas.aURL0") + c + viper.GetString("canvas.aURL1") + viper.GetString("canvas.token")
+		qURL = viper.GetString("canvas.aURLs") + c + viper.GetString("canvas.aURLe") + viper.GetString("canvas.token")
 		res, err := http.Get(qURL)
 		if err != nil {
 			log.Fatal(err)
