@@ -7,11 +7,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ReeceDonovan/CS-bot/api"
+	"github.com/ReeceDonovan/CS-bot/commands"
+	"github.com/ReeceDonovan/CS-bot/config"
 	"github.com/Strum355/log"
 	"github.com/bwmarrin/discordgo"
-	"github.com/reecedonovan/CS-bot/api"
-	"github.com/reecedonovan/CS-bot/commands"
-	"github.com/reecedonovan/CS-bot/config"
+
 	"github.com/spf13/viper"
 
 	"github.com/go-co-op/gocron"

@@ -4,9 +4,9 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/ReeceDonovan/CS-bot/api"
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-co-op/gocron"
-	"github.com/reecedonovan/CS-bot/api"
 )
 
 func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
