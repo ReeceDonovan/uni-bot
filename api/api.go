@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,55 +30,83 @@ func Run(s *discordgo.Session) {
 	session = s
 }
 
-func QueryCourse() courseData {
+func QueryCourse() []ParsedCourse {
 	var cdata courseData
-	qURL = viper.GetString("canvas.cURL") + viper.GetString("canvas.token")
-	res, err := http.Get(qURL)
-	if err != nil {
-		log.Fatal(err)
+
+	parsedC := []ParsedCourse{}
+
+	cachedCourses, found := cachedC.Get("courses")
+
+	if found {
+		parsedC = cachedCourses.([]ParsedCourse)
+		fmt.Println("Cache found")
+	} else {
+		fmt.Println("Cache created")
+		qURL = viper.GetString("canvas.cURL") + viper.GetString("canvas.token")
+		res, err := http.Get(qURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		body, readErr := ioutil.ReadAll(res.Body)
+		if readErr != nil {
+			log.Fatal(readErr)
+		}
+		jsonErr := json.Unmarshal([]byte(body), &cdata)
+		if jsonErr != nil {
+			log.Fatal(jsonErr)
+		}
+		for _, c := range cdata {
+			if c.CreatedAt.Unix() > time.Now().AddDate(-1, 0, 0).Unix() {
+				parsedC = append(parsedC, ParsedCourse{
+					c.ID,
+					c.Name,
+					c.CourseCode,
+				})
+			}
+		}
+		cachedC.Set("courses", parsedC, cache.DefaultExpiration)
 	}
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		log.Fatal(readErr)
-	}
-	jsonErr := json.Unmarshal([]byte(body), &cdata)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
-	}
-	return cdata
+	return parsedC
 }
 
-func QueryAssign(c string) []parsedAssignment {
+func QueryAssign(c string) []ParsedAssignment {
 	var adata assignmentData
 
-	parsedData := []parsedAssignment{}
-	qURL = ("https://ucc.instructure.com/api/v1/users/self/courses/" + c + "/assignments?&order_by=due_at&access_token=" + viper.GetString("canvas.token"))
-	res, err := http.Get(qURL)
-	if err != nil {
-		log.Fatal(err)
-	}
+	parsedA := []ParsedAssignment{}
 
-	body, readErr := ioutil.ReadAll(res.Body)
-	if readErr != nil {
-		log.Fatal(readErr)
-	}
+	cachedAssignments, found := cachedA.Get("assignments")
 
-	jsonErr := json.Unmarshal([]byte(body), &adata)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
-	}
+	if found {
+		parsedA = cachedAssignments.([]ParsedAssignment)
+		fmt.Println("Cache found")
+	} else {
+		qURL = viper.GetString("canvas.aURL.0") + c + viper.GetString("canvas.aURL.1") + viper.GetString("canvas.token")
+		res, err := http.Get(qURL)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	for _, a := range adata {
-		if a.DueAt.Unix() > time.Now().AddDate(0, 0, 0).Unix() {
-			parsedData = append(parsedData, parsedAssignment{
-				a.ID,
-				a.Name,
-				a.Description,
-				a.HTMLURL,
-				a.DueAt,
-			})
+		body, readErr := ioutil.ReadAll(res.Body)
+		if readErr != nil {
+			log.Fatal(readErr)
+		}
+
+		jsonErr := json.Unmarshal([]byte(body), &adata)
+		if jsonErr != nil {
+			log.Fatal(jsonErr)
+		}
+
+		for _, a := range adata {
+			if a.DueAt.Unix() > time.Now().AddDate(0, 0, 0).Unix() {
+				parsedA = append(parsedA, ParsedAssignment{
+					a.ID,
+					a.Name,
+					a.Description,
+					a.HTMLURL,
+					a.DueAt,
+				})
+			}
 		}
 	}
-
-	return parsedData
+	return parsedA
 }

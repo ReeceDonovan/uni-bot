@@ -23,9 +23,12 @@ func initDefaults() {
 
 	// Discord
 	viper.SetDefault("discord.token", result["discord.bot.token"])
+
+	// Canvas
 	viper.SetDefault("canvas.token", result["canvas.api.token"])
-	viper.SetDefault("canvas.cURL", result["canvas.course.URL"])
-	viper.SetDefault("canvas.aURL", result["canvas.assignment.URL"])
+	viper.SetDefault("canvas.cURL", "https://ucc.instructure.com/api/v1/users/self/courses?enrollment_state=active&state[]=available&include[]=term&exclude[]=enrollments&sort=nickname&access_token=")
+	viper.SetDefault("canvas.aURL.0", "https://ucc.instructure.com/api/v1/users/self/courses/")
+	viper.SetDefault("canvas.aURL.1", "/assignments?&order_by=due_at&access_token=")
 
 	// Bot
 	viper.SetDefault("bot.prefix", "!")

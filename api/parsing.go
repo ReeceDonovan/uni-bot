@@ -107,7 +107,12 @@ type assignmentData []struct {
 	RequireLockdownBrowser          bool        `json:"require_lockdown_browser"`
 }
 
-type parsedAssignment struct {
+type ParsedCourse struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	CourseCode string `json:"course_code"`
+}
+type ParsedAssignment struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
