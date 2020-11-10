@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/ReeceDonovan/CS-bot/api"
-	"github.com/Strum355/log"
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-co-op/gocron"
 	"github.com/spf13/viper"
@@ -32,11 +31,11 @@ func AnnounceHandler(ctx context.Context, s *discordgo.Session, m *discordgo.Mes
 func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate) {
 	var token string
 	if len(m.GuildID) == 0 {
-		ctx := context.WithValue(context.Background(), log.Key, log.Fields{
-			"author_id":  m.Author.ID,
-			"channel_id": m.ChannelID,
-			"guild_id":   "DM",
-		})
+		// ctx := context.WithValue(context.Background(), log.Key, log.Fields{
+		// 	"author_id":  m.Author.ID,
+		// 	"channel_id": m.ChannelID,
+		// 	"guild_id":   "DM",
+		// })
 		fmt.Println(m.Content)
 		token = m.Content
 	} else {
