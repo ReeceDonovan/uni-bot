@@ -29,7 +29,7 @@ func AnnounceHandler(ctx context.Context, s *discordgo.Session, m *discordgo.Mes
 }
 
 func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate) {
-	var token string
+	token := viper.GetString("canvas.token")
 	if len(m.GuildID) == 0 {
 		// ctx := context.WithValue(context.Background(), log.Key, log.Fields{
 		// 	"author_id":  m.Author.ID,
@@ -38,8 +38,6 @@ func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.
 		// })
 		fmt.Println(m.Content)
 		token = m.Content
-	} else {
-		token = viper.GetString("canvas.token")
 	}
 	AnnounceAssignments(s, m.ChannelID, token)
 }
