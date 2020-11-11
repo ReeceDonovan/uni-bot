@@ -36,7 +36,7 @@ func main() {
 	token := viper.GetString("discord.token")
 	session, err := discordgo.New("Bot " + token)
 
-	// session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	if err != nil {
 		log.Error("Failed to start bot")
 	}

@@ -7,9 +7,12 @@ import (
 	"strings"
 
 	"github.com/ReeceDonovan/CS-bot/api"
+	"github.com/UCCNetsoc/discord-bot/embed"
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-co-op/gocron"
 	"github.com/spf13/viper"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
@@ -39,7 +42,6 @@ func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.
 }
 
 func AnnounceAssignments(s *discordgo.Session, channel string, token string) {
-	message := ""
 	rawCourses, err := api.QueryCourse(token)
 	if err != nil {
 		fmt.Println("Token error")
@@ -47,17 +49,22 @@ func AnnounceAssignments(s *discordgo.Session, channel string, token string) {
 		return
 	}
 
+	emb := embed.NewEmbed()
+	emb.SetColor(0xab0df9)
+	p := message.NewPrinter(language.English)
+	body := ""
+	emb.SetTitle("Assignments")
 	for _, course := range rawCourses {
 		assData := api.QueryAssign(strconv.Itoa(course.ID), token)
 		if len(assData) >= 1 {
-			message += "**__" + course.Name + "__**\n\n"
+			body += p.Sprintf("**__%s__**\n\n", course.Name)
 			for _, ass := range assData {
-				message += "**" + ass.Name + "**" + "\n"
-				message += "Due at: " + ass.DueAt.UTC().Format("3:04 PM - Jan 2") + "\n"
-				message += ass.HTMLURL
-				message += "\n\n"
+				body += p.Sprintf("**%s**\n", ass.Name)
+				body += p.Sprintf("Due at: %s\n", ass.DueAt.UTC().Format("3:04 PM - Jan 2"))
+				body += p.Sprintf("%s\n\n", ass.HTMLURL)
 			}
 		}
 	}
-	s.ChannelMessageSend(channel, message)
+	emb.SetDescription(body)
+	s.ChannelMessageSendEmbed(channel, emb.MessageEmbed)
 }
