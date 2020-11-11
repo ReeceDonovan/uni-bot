@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/ReeceDonovan/CS-bot/api"
 	"github.com/bwmarrin/discordgo"
@@ -24,21 +25,14 @@ func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
 	// }
 }
 
-func AnnounceHandler(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, token string) {
-	AnnounceAssignments(s, "", token)
-}
-
 func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate) {
 	token := viper.GetString("canvas.token")
-	if len(m.GuildID) == 0 {
-		// ctx := context.WithValue(context.Background(), log.Key, log.Fields{
-		// 	"author_id":  m.Author.ID,
-		// 	"channel_id": m.ChannelID,
-		// 	"guild_id":   "DM",
-		// })
-		fmt.Println(m.Content)
-		if m.Content != "" {
-			token = m.Content
+	fmt.Println(m.GuildID)
+	if (m.GuildID != strconv.Itoa(624287001335562289)) || (m.GuildID != strconv.Itoa(471231303317192733)) {
+		commandStr, body := extractCommand(m.Content)
+		fmt.Println(commandStr)
+		if len(strings.Fields(body)) > 1 {
+			token = strings.Fields(body)[1]
 		}
 	}
 	AnnounceAssignments(s, m.ChannelID, token)
@@ -46,7 +40,14 @@ func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.
 
 func AnnounceAssignments(s *discordgo.Session, channel string, token string) {
 	message := ""
-	for _, course := range api.QueryCourse(token) {
+	rawCourses, err := api.QueryCourse(token)
+	if err != nil {
+		fmt.Println("Token error")
+		s.ChannelMessageSend(channel, "Error querying Canvas API, is your token correct?")
+		return
+	}
+
+	for _, course := range rawCourses {
 		assData := api.QueryAssign(strconv.Itoa(course.ID), token)
 		if len(assData) >= 1 {
 			message += "**__" + course.Name + "__**\n\n"
