@@ -7,10 +7,10 @@ import (
 func initDefaults() {
 
 	// Discord
-	viper.SetDefault("discord.token", "")
+	viper.SetDefault("discord.token", "DISCORD_TOKEN")
 
 	// Canvas
-	viper.SetDefault("canvas.token", "")
+	viper.SetDefault("canvas.token", "CANVAS_API_TOKEN")
 	viper.SetDefault("canvas.cURL", "https://ucc.instructure.com/api/v1/users/self/courses?enrollment_state=active&state[]=available&include[]=term&exclude[]=enrollments&sort=nickname&access_token=")
 	viper.SetDefault("canvas.aURLs", "https://ucc.instructure.com/api/v1/users/self/courses/")
 	viper.SetDefault("canvas.aURLe", "/assignments?&order_by=due_at&access_token=")

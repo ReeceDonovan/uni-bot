@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/Strum355/log"
@@ -35,8 +34,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	if !strings.HasPrefix(m.Content, viper.GetString("bot.prefix")) {
-		fmt.Println(viper.GetString("bot.prefix"))
-		fmt.Println("command check")
 		return
 	}
 	callCommand(s, m)
