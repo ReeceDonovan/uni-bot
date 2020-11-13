@@ -11,7 +11,9 @@ Using the discordGo package/wrapper for the Discord bot API and deploying using 
 ## Features?
 
 **Current**
+
 Current features include an !assignment command which you can run on the CS 2nd year server or by direct messaging the bot, this will return a formatted list of our courses active assignments (parsed from the UCC Canvas API using my personal token being passed in as an environment variable)
 
 **Future**
+
 Hopefully getting to implement an Oauth feature that allows use of the bot by any user and on any discord server, providing users of any course with personalized individual assignment information and features
