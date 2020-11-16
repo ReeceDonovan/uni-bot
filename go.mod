@@ -1,4 +1,4 @@
-module github.com/ReeceDonovan/CS-bot
+module github.com/ReeceDonovan/uni-bot
 
 go 1.13
 

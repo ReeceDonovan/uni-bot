@@ -7,9 +7,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ReeceDonovan/CS-bot/api"
-	"github.com/ReeceDonovan/CS-bot/commands"
-	"github.com/ReeceDonovan/CS-bot/config"
+	"github.com/ReeceDonovan/uni-bot/api"
+	"github.com/ReeceDonovan/uni-bot/commands"
+	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/Strum355/log"
 	"github.com/bwmarrin/discordgo"
 

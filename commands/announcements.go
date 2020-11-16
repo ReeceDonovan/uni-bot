@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ReeceDonovan/CS-bot/api"
+	"github.com/ReeceDonovan/uni-bot/api"
 	"github.com/UCCNetsoc/discord-bot/embed"
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-co-op/gocron"

@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   discord-bot:
-    container_name: CS-bot.local
+    container_name: uni-bot.local
     # command: modd # Hot reloading
     build: .
     ports:
@@ -11,4 +11,4 @@ services:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CANVAS_TOKEN=${CANVAS_API_TOKEN}
     volumes:
-      - /mnt/d/UCC/Side_Projects/CS-bot:/bot
+      - /mnt/d/UCC/Side_Projects/uni-bot:/bot
