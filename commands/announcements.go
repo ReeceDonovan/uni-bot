@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ReeceDonovan/uni-bot/api"
 	"github.com/UCCNetsoc/discord-bot/embed"
@@ -57,10 +58,12 @@ func AnnounceAssignments(s *discordgo.Session, channel string, token string) {
 	for _, course := range rawCourses {
 		assData := api.QueryAssign(strconv.Itoa(course.ID), token)
 		if len(assData) >= 1 {
-			body += p.Sprintf("**__%s__**\n\n", course.Name)
+			body += p.Sprintf("__**%s**__\n\n", course.Name)
 			for _, ass := range assData {
-				body += p.Sprintf("**%s**\n", ass.Name)
-				body += p.Sprintf("Due at: %s\n", ass.DueAt.UTC().Format("3:04 PM - Jan 2"))
+				body += p.Sprintf("%s ", ass.Name)
+				body += p.Sprintf("[%s]\n", (ass.DueAt.UTC().Format("15:04 - 02/01")))
+				body += p.Sprintf("Due in: **%d Days, ", int((time.Until(ass.DueAt)).Hours()/24))
+				body += p.Sprintf("%d Hours**\n", int((((time.Until(ass.DueAt)).Hours()/24)-(float64(int((time.Until(ass.DueAt)).Hours()/24))))*24))
 				body += p.Sprintf("%s\n\n", ass.HTMLURL)
 			}
 		}

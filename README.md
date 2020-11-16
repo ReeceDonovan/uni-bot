@@ -14,7 +14,7 @@ Using the discordGo package/wrapper for the Discord bot API and deploying using 
 
 Current features include an !assignment command which you can run on the CS 2nd year server or by direct messaging the bot, this will return a formatted list of our courses active assignments (parsed from the UCC Canvas API using my personal token being passed in as an environment variable)
 
-![Assignment Message](https://i.gyazo.com/15f46cce089a23c552acff34526c890f.png)
+![Assignment Message](https://i.gyazo.com/d2ee4267888c6e52c88bd1dae6405ce8.png)
 
 **Future**
 
