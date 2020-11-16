@@ -10,19 +10,22 @@ import (
 )
 
 var (
+	helpMsgs    = make(map[string]string)
 	commandsMap = make(map[string]func(context.Context, *discordgo.Session, *discordgo.MessageCreate))
 )
 
 type commandFunc func(context.Context, *discordgo.Session, *discordgo.MessageCreate)
 
 func command(name string, helpMessage string, function commandFunc) {
+	helpMsgs[name] = helpMessage
 	commandsMap[name] = function
 }
 
 func Register(s *discordgo.Session) {
+	command("help", "Replies list of commands", helpCommand)
 	command(
 		"assignment",
-		"replies with embed of the the next upcoming netsoc event, queried from facebook",
+		"Replies with formatted embed of active course assignments, parsed from Canvas API",
 		AnnounceMsgHandler,
 	)
 	s.AddHandler(messageCreate)
