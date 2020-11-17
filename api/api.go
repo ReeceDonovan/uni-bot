@@ -38,7 +38,7 @@ func QueryCourse(token string) ([]ParsedCourse, error) {
 
 	if found {
 		parsedC = cachedCourses.([]ParsedCourse)
-		fmt.Println("Cache found")
+		fmt.Println("Courses Cache found")
 	} else {
 		fmt.Println("Cache created")
 		qURL = viper.GetString("canvas.cURL") + token
@@ -77,7 +77,7 @@ func QueryAssign(c string, token string) []ParsedAssignment {
 
 	if found {
 		parsedA = cachedAssignments.([]ParsedAssignment)
-		fmt.Println("Cache found")
+		fmt.Println(c + " Ass Cache found")
 	} else {
 		qURL = viper.GetString("canvas.aURLs") + c + viper.GetString("canvas.aURLe") + token
 		res, err := http.Get(qURL)

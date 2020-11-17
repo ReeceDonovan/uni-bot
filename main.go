@@ -50,8 +50,7 @@ func main() {
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.StartAsync()
 
-	// TODO: Scheduler
-	// scheduler.Every(10).Second().Do(commands.RefeshSchedule, scheduler, session)
+	// scheduler.Every(1).Day().Do(commands.RefeshSchedule, scheduler, session)
 
 	// Maintain connection until a SIGTERM, then cleanly exit
 	log.Info("Bot is Running")
