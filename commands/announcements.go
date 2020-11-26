@@ -60,11 +60,15 @@ func AnnounceAssignments(s *discordgo.Session, channel string, token string) {
 		if len(assData) >= 1 {
 			body += p.Sprintf("__**%s**__\n\n", course.Name)
 			for _, ass := range assData {
+				days := int(time.Until(ass.DueAt).Hours() / 24)
+				hours := int(time.Until(ass.DueAt).Hours() - float64(int(days*24)))
+				minutes := int(time.Until(ass.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
 				body += p.Sprintf("%s ", ass.Name)
 				body += p.Sprintf("[%s]\n", (ass.DueAt.UTC().Format("15:04 - 02/01")))
-				body += p.Sprintf("Due in: **%d Days, ", int((time.Until(ass.DueAt)).Hours()/24))
-				body += p.Sprintf("%d Hours**\n", int((((time.Until(ass.DueAt)).Hours()/24)-(float64(int((time.Until(ass.DueAt)).Hours()/24))))*24))
-				body += p.Sprintf("%s\n\n", ass.HTMLURL)
+				body += p.Sprintf("Due in: **%d Days, ", days)
+				body += p.Sprintf("%d Hours, ", hours)
+				body += p.Sprintf("%d Minutes", minutes)
+				body += p.Sprintf("**\n%s\n\n", ass.HTMLURL)
 			}
 		}
 	}
