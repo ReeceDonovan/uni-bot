@@ -18,15 +18,49 @@ import (
 
 func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
 	schedule.Clear()
-	//TODO: Scheduler
-	// AnnounceAssignments(s)
-	// api.QueryCourse()
+	allAss := []api.ParsedAssignment{}
+	token := viper.GetString("canvas.token")
+	rawCourses, err := api.QueryCourse(token)
+	if err != nil {
+		fmt.Println("Token error")
+		return
+	}
+	for _, course := range rawCourses {
+		assData := api.QueryAssign(strconv.Itoa(course.ID), token)
+		if len(assData) >= 1 {
+			for _, ass := range assData {
+				allAss = append(allAss, ass)
+			}
+		}
+	}
 
-	// upcomingAssignment := api.QueryCanvas()
+	for _, aAss := range allAss {
+		if (time.Now().Unix() - aAss.DueAt.Unix()) < 57600 {
+			AnnounceDue(context.TODO(), s, aAss)
+		}
+	}
+}
 
-	// if len(upcomingAssignment) > 0 {
-	// 	schedule.Every(1).Hour().StartAt((time.Unix((upcomingAssignment[0].Date - 600), 0))).Do(UpcomingAssignmentAnnounce, context.TODO(), s)
-	// }
+func AnnounceDue(ctx context.Context, s *discordgo.Session, a api.ParsedAssignment) {
+	channelID := "775748035426648114"
+	emb := embed.NewEmbed()
+	emb.SetColor(0xab0df9)
+	p := message.NewPrinter(language.English)
+	body := ""
+	emb.SetTitle("Due Today")
+	days := int(time.Until(a.DueAt).Hours() / 24)
+	hours := int(time.Until(a.DueAt).Hours() - float64(int(days*24)))
+	minutes := int(time.Until(a.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
+	body += p.Sprintf("%s ", a.Name)
+	body += p.Sprintf("[%s]\n", (a.DueAt.UTC().Format("15:04 - 02/01")))
+	body += p.Sprintf("Due in: **%d Days, ", days)
+	body += p.Sprintf("%d Hours, ", hours)
+	body += p.Sprintf("%d Minutes", minutes)
+	body += p.Sprintf("**\n%s\n\n", a.HTMLURL)
+
+	emb.SetDescription(body)
+	s.ChannelMessageSend(channelID, "<@&775747861186871317>")
+	s.ChannelMessageSendEmbed(channelID, emb.MessageEmbed)
 }
 
 func AnnounceMsgHandler(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate) {
