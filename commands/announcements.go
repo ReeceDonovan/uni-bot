@@ -35,7 +35,7 @@ func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
 	}
 
 	for _, aAss := range allAss {
-		if (time.Now().Unix() - aAss.DueAt.Unix()) < 57600 {
+		if (aAss.DueAt.Unix() - time.Now().Unix()) < 57600 {
 			AnnounceDue(context.TODO(), s, aAss)
 		}
 	}
