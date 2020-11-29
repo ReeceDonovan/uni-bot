@@ -59,7 +59,7 @@ func AnnounceDue(ctx context.Context, s *discordgo.Session, a api.ParsedAssignme
 	body += p.Sprintf("**\n%s\n\n", a.HTMLURL)
 
 	emb.SetDescription(body)
-	s.ChannelMessageSend(channelID, "<@&775747861186871317>")
+	s.ChannelMessageSend(channelID, "<@&631495001573949450>")
 	s.ChannelMessageSendEmbed(channelID, emb.MessageEmbed)
 }
 
