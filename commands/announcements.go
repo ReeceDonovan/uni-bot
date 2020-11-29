@@ -42,7 +42,7 @@ func RefeshSchedule(schedule *gocron.Scheduler, s *discordgo.Session) {
 }
 
 func AnnounceDue(ctx context.Context, s *discordgo.Session, a api.ParsedAssignment) {
-	channelID := "775748035426648114"
+	channelID := "781515702266888194"
 	emb := embed.NewEmbed()
 	emb.SetColor(0xab0df9)
 	p := message.NewPrinter(language.English)
