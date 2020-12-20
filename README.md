@@ -2,7 +2,7 @@
 
 ## What?
 
-This is a discord bot scoped on my computer science class's discord server but hopefully extend the scope to other UCC class servers.
+This is a discord bot built for my computer science class's discord server but hopefully extend the scope to other UCC class servers.
 
 ## How?
 
