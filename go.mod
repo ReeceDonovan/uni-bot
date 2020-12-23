@@ -1,8 +1,9 @@
-module github.com/reecedonovan/uni-bot
+module github.com/ReeceDonovan/uni-bot
 
 go 1.15
 
 require (
+	github.com/bwmarrin/discordgo v0.22.0
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.4.0 // indirect
