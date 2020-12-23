@@ -4,8 +4,6 @@ WORKDIR /bot
 
 RUN apk add git
 
-RUN GO111MODULE=on go get github.com/cortesi/modd/cmd/modd
-
 COPY go.mod .
 COPY go.sum .
 
@@ -23,7 +21,6 @@ FROM alpine
 WORKDIR /bin
 
 COPY --from=dev /go/bin/uni-bot ./uni-bot
-
 
 
 CMD ["sh", "-c", "uni-bot -p"]

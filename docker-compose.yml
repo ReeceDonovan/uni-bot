@@ -10,5 +10,3 @@ services:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CANVAS_TOKEN=${CANVAS_API_TOKEN}
-    volumes:
-      - /mnt/d/UCC/Side_Projects/uni-bot:/bot
