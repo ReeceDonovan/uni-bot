@@ -44,29 +44,44 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 
 // TODO: Might move everything from here down to different file for tidyness if we need other query commands, but ah sur. Also gotta change default struct variable names from the autogen
 
-func QueryAssignments() (parsedAss Assignment) {
+func QueryAssignments() (parsedData CourseAssignment) {
 
 	_, res := Req("POST", "/api/graphql",
 		fmt.Sprintf("%s", viper.GetString("canvas.token")),
 		[]byte(`
-			{"query": "query Assignments {
+			{"query": "query CourseAssignments {
 				allCourses {
+				  _id
+				  name
+				  state
+				  courseCode
+				  term {
+					_id
 					name
-					assignmentsConnection {
-						edges {
-						node {
-							name
-							dueAt
-							htmlUrl
-							}
-						}
+				  }
+				  assignmentsConnection {
+					edges {
+					  node {
+						name
+						dueAt
+						htmlUrl
+					  }
 					}
+				  }
+				  enrollmentsConnection {
+					edges {
+					  node {
+						id
+					  }
+					}
+				  }
 				}
-			}"}`))
+			  }
+			  "}`))
 
-	jsonErr := json.Unmarshal(res, &parsedAss)
+	jsonErr := json.Unmarshal(res, &parsedData)
 	if jsonErr != nil {
 		log.Println("Error parsing response\n", jsonErr)
 	}
-	return parsedAss
+	return parsedData
 }

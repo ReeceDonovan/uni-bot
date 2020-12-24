@@ -18,7 +18,7 @@ func command(name string, function commandFunc) {
 
 func Register(s *discordgo.Session) {
 	// TODO: Register commands
-
+	command("term", TermAssignments)
 	s.AddHandler(messageCreate)
 }
 
