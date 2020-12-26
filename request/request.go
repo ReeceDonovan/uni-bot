@@ -60,13 +60,12 @@ func QueryAssignments() (parsedData CourseAssignment) {
 					name
 				  }
 				  assignmentsConnection {
-					edges {
-					  node {
+					  nodes {
+						_id
 						name
 						dueAt
 						htmlUrl
 					  }
-					}
 				  }
 				  enrollmentsConnection {
 					edges {

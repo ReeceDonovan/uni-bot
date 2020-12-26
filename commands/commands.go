@@ -1,10 +1,13 @@
 package commands
 
 import (
-	"fmt"
+	"log"
 
+	embed "github.com/Clinet/discordgo-embed"
 	"github.com/ReeceDonovan/uni-bot/request"
 	"github.com/bwmarrin/discordgo"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 // TODO: Add functions for more bot commands
@@ -12,17 +15,36 @@ import (
 // Test command for now, sends basic string of modules/assignments from current term as message. Will eventually be an embed and not hardcoded termID
 
 func TermAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
+
 	CourseAssignment := request.QueryAssignments()
-	msg := ""
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	p := message.NewPrinter(language.English)
+
+	body := ""
+
+	emb.SetTitle("This Terms Assignments")
+
 	for _, course := range CourseAssignment.Data.AllCourses {
+		log.Println(course.CourseName)
+
 		if course.Term.ID != "44" || course.EnrollmentsConnection == nil {
 			continue
 		}
-		msg += "\n" + course.CourseName + ":\n"
-		for _, assignment := range course.AssignmentsConnection.Edges {
-			msg += fmt.Sprintf("%s", assignment.Node.HTMLURL) + "\n"
+		log.Println(course.CourseName)
+
+		body += p.Sprintf("__**%s**__\n\n", course.CourseName)
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			body += p.Sprintf("%s ", assignment.Name)
+			body += p.Sprintf("[%s]\n", (assignment.DueAt.UTC().Format("15:04 - 02/01")))
+			body += p.Sprintf("\n%s\n\n", assignment.HTMLURL)
 		}
 	}
-	fmt.Println(msg)
-	s.ChannelMessageSend(m.ChannelID, msg)
+
+	emb.SetDescription(body)
+	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+
 }

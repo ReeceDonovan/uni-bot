@@ -1,5 +1,7 @@
 package request
 
+import "time"
+
 // TODO: Clean up struct, think of any other useful data we could use from the api
 
 type CourseAssignment struct {
@@ -14,17 +16,19 @@ type CourseAssignment struct {
 				Name string `json:"name"`
 			} `json:"term"`
 			AssignmentsConnection struct {
-				Edges []struct {
-					Node struct {
-						Name    string      `json:"name"`
-						DueAt   interface{} `json:"dueAt"`
-						HTMLURL string      `json:"htmlUrl"`
-					} `json:"node"`
-				} `json:"edges"`
+				Nodes []struct {
+					ID      string    `json:"_id"`
+					Name    string    `json:"name"`
+					DueAt   time.Time `json:"dueAt"`
+					HTMLURL string    `json:"htmlUrl"`
+					// ScoreStatistics struct {
+					// 	Min  float64 `json:"min"`
+					// 	Max  float64 `json:"max"`
+					// 	Mean float64 `json:"mean"`
+					// } `json:"score_statistics,omitempty"`
+				} `json:"nodes"`
 			} `json:"assignmentsConnection"`
 			EnrollmentsConnection interface{} `json:"enrollmentsConnection"`
 		} `json:"allCourses"`
 	} `json:"data"`
 }
-
-
