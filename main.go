@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/ReeceDonovan/uni-bot/commands"
+	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
 )

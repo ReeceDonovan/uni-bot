@@ -17,18 +17,24 @@ type CourseAssignment struct {
 			} `json:"term"`
 			AssignmentsConnection struct {
 				Nodes []struct {
-					ID      string    `json:"_id"`
-					Name    string    `json:"name"`
-					DueAt   time.Time `json:"dueAt"`
-					HTMLURL string    `json:"htmlUrl"`
-					// ScoreStatistics struct {
-					// 	Min  float64 `json:"min"`
-					// 	Max  float64 `json:"max"`
-					// 	Mean float64 `json:"mean"`
-					// } `json:"score_statistics,omitempty"`
+					ID              string          `json:"_id"`
+					Name            string          `json:"name"`
+					DueAt           time.Time       `json:"dueAt"`
+					HTMLURL         string          `json:"htmlUrl"`
+					ScoreStatistics ScoreStatistics `json:"score_statistics,omitempty"`
 				} `json:"nodes"`
 			} `json:"assignmentsConnection"`
 			EnrollmentsConnection interface{} `json:"enrollmentsConnection"`
 		} `json:"allCourses"`
 	} `json:"data"`
+}
+
+type ScoreStatistics struct {
+	Min  float64 `json:"min"`
+	Max  float64 `json:"max"`
+	Mean float64 `json:"mean"`
+}
+
+type ScoreRaw []struct {
+	ScoreStatistics ScoreStatistics `json:"score_statistics,omitempty"`
 }

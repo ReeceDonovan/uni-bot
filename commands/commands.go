@@ -10,7 +10,7 @@ import (
 	"golang.org/x/text/message"
 )
 
-// TODO: Add functions for more bot commands
+// TODO: Add functions for more bot commands e.g Stats for specific modules
 
 // Test command for now, sends basic string of modules/assignments from current term as message. Will eventually be an embed and not hardcoded termID
 
@@ -38,9 +38,12 @@ func TermAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		body += p.Sprintf("__**%s**__\n\n", course.CourseName)
 		for _, assignment := range course.AssignmentsConnection.Nodes {
-			body += p.Sprintf("%s ", assignment.Name)
-			body += p.Sprintf("[%s]\n", (assignment.DueAt.UTC().Format("15:04 - 02/01")))
-			body += p.Sprintf("\n%s\n\n", assignment.HTMLURL)
+			body += p.Sprintf("%s \n", assignment.Name)
+			body += p.Sprintf("%d ", int(assignment.ScoreStatistics.Max))
+			body += p.Sprintf("%d ", int(assignment.ScoreStatistics.Mean))
+			body += p.Sprintf("%d \n", int(assignment.ScoreStatistics.Min))
+			// body += p.Sprintf("[%s]\n", (assignment.DueAt.UTC().Format("15:04 - 02/01")))
+			// body += p.Sprintf("\n%s\n\n", assignment.HTMLURL)
 		}
 	}
 

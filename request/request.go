@@ -82,5 +82,25 @@ func QueryAssignments() (parsedData CourseAssignment) {
 	if jsonErr != nil {
 		log.Println("Error parsing response\n", jsonErr)
 	}
+
+	for _, course := range parsedData.Data.AllCourses {
+		if course.Term.ID != "44" || course.EnrollmentsConnection == nil {
+			continue
+		}
+		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
+
+		assStat := ScoreRaw{}
+
+		jsonErr := json.Unmarshal(res, &assStat)
+		if jsonErr != nil {
+			log.Println("Error parsing response\n", jsonErr)
+		}
+
+		for x, _ := range course.AssignmentsConnection.Nodes {
+			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
+			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
+			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
+		}
+	}
 	return parsedData
 }
