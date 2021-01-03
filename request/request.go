@@ -44,10 +44,10 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 
 // TODO: Might move everything from here down to different file for tidyness if we need other query commands, but ah sur. Also gotta change default struct variable names from the autogen
 
-func QueryAssignments() (parsedData CourseAssignment) {
+func QueryAssignments(token string) (parsedData CourseAssignment) {
 
 	_, res := Req("POST", "/api/graphql",
-		fmt.Sprintf("%s", viper.GetString("canvas.token")),
+		fmt.Sprintf("%s", token),
 		[]byte(`
 			{"query": "query CourseAssignments {
 				allCourses {
@@ -82,24 +82,25 @@ func QueryAssignments() (parsedData CourseAssignment) {
 	if jsonErr != nil {
 		log.Println("Error parsing response\n", jsonErr)
 	}
+	if token == viper.GetString("canvas.token") {
+		for _, course := range parsedData.Data.AllCourses {
+			if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection == nil {
+				continue
+			}
+			_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", token), nil)
 
-	for _, course := range parsedData.Data.AllCourses {
-		if course.Term.ID != "44" || course.EnrollmentsConnection == nil {
-			continue
-		}
-		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
+			assStat := ScoreRaw{}
 
-		assStat := ScoreRaw{}
+			jsonErr := json.Unmarshal(res, &assStat)
+			if jsonErr != nil {
+				log.Println("Error parsing response\n", jsonErr)
+			}
 
-		jsonErr := json.Unmarshal(res, &assStat)
-		if jsonErr != nil {
-			log.Println("Error parsing response\n", jsonErr)
-		}
-
-		for x, _ := range course.AssignmentsConnection.Nodes {
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
+			for x, _ := range course.AssignmentsConnection.Nodes {
+				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
+				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
+				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
+			}
 		}
 	}
 	return parsedData

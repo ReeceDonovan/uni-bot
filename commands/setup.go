@@ -18,7 +18,7 @@ func command(name string, function commandFunc) {
 
 func Register(s *discordgo.Session) {
 	// TODO: Register commands
-	command("assignment", CurrentAssignments )
+	command("assignment", CurrentAssignments)
 	command("stats", CourseStats)
 	s.AddHandler(messageCreate)
 }
@@ -33,7 +33,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	callCommand(s, m)
 }
 
-func callCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+func callCommand(s *discordgo.Session, m *discordgo.MessageCreate) {	
 	commandStr, _ := extractCommand(m.Content)
 	if command, ok := commandsMap[commandStr]; ok {
 		log.Println("Command Triggered")
