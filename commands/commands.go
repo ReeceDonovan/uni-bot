@@ -9,24 +9,18 @@ import (
 	embed "github.com/Clinet/discordgo-embed"
 	"github.com/ReeceDonovan/uni-bot/request"
 	"github.com/bwmarrin/discordgo"
-	"github.com/spf13/viper"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
-// TODO: Add functions for more bot commands e.g Stats for specific modules
+// TODO: Add more commands
+// TODO: Cleanup command functions (maybe work out a helper func for created the message embed to avoid repeated code)
 
 // Test command for now, sends basic string of modules/assignments from current term as message. Will eventually be an embed and not hardcoded termID
 
 func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
-	token := viper.GetString("canvas.token")
-	_, slug := extractCommand(m.Content)
-	if len(strings.Fields(slug)) > 1 {
-		token = strings.Fields(slug)[1]
-		fmt.Println(token)
-	}
 
-	CourseAssignment := request.QueryAssignments(token)
+	CourseAssignment := request.QueryAssignments()
 	valid := false
 
 	emb := embed.NewEmbed()
@@ -72,7 +66,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	slug = strings.ToUpper(strings.Split(slug, " ")[1])
-	CourseAssignment := request.QueryAssignments(viper.GetString("canvas.token"))
+	CourseAssignment := request.QueryAssignments()
 
 	valid := false
 	emb := embed.NewEmbed()
@@ -84,17 +78,15 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
 			continue
 		}
-		for x, assignment := range course.AssignmentsConnection.Nodes {
+		for _, assignment := range course.AssignmentsConnection.Nodes {
 			if assignment.ScoreStatistics.Max == 0 {
 				continue
 			}
 			valid = true
-			emb.AddField("⠀", "__**CA:**__")
-			emb.AddField("⠀", "**"+fmt.Sprintf("%d", x+1)+"**")
-			emb.AddField("⠀", "⠀")
-			emb.AddField("Max:", fmt.Sprintf("%d", int(assignment.ScoreStatistics.Max)))
-			emb.AddField("Mean:", fmt.Sprintf("%d", int(assignment.ScoreStatistics.Mean)))
-			emb.AddField("Min:", fmt.Sprintf("%d", int(assignment.ScoreStatistics.Min)))
+			log.Println(assignment.Name)
+			emb.AddField("Max:", fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)))
+			emb.AddField("Mean:", fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)))
+			emb.AddField("Min:", fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)))
 		}
 	}
 	emb.InlineAllFields()
