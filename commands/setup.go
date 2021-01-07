@@ -17,7 +17,7 @@ func command(name string, function commandFunc) {
 }
 
 func Register(s *discordgo.Session) {
-	// TODO: Register commands
+	// TODO: Possibly implement a help command
 	command("assignment", CurrentAssignments)
 	command("stats", CourseStats)
 	s.AddHandler(messageCreate)

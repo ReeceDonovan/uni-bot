@@ -34,6 +34,11 @@ func main() {
 
 	commands.Register(session)
 
+	// scheduler := gocron.NewScheduler(time.UTC)
+	// scheduler.StartAsync()
+
+	// scheduler.Every(1).Day().At("10:30").Do(commands.RefeshSchedule, scheduler, session)
+
 	log.Println("Bot is Running")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
