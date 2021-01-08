@@ -7,24 +7,32 @@ import "time"
 type CourseAssignment struct {
 	Data struct {
 		AllCourses []struct {
+			AssignmentsConnection struct {
+				Nodes []struct {
+					DueAt           time.Time       `json:"dueAt"`
+					HTMLURL         string          `json:"htmlUrl"`
+					ID              string          `json:"_id"`
+					Name            string          `json:"name"`
+					ScoreStatistics ScoreStatistics `json:"score_statistics,omitempty"`
+				} `json:"nodes"`
+			} `json:"assignmentsConnection"`
+			CourseCode            string `json:"courseCode"`
+			EnrollmentsConnection struct {
+				Nodes []struct {
+					Type string `json:"type"`
+					User struct {
+						ID   string `json:"_id"`
+						Name string `json:"name"`
+					} `json:"user"`
+				} `json:"nodes"`
+			} `json:"enrollmentsConnection"`
 			ID         string `json:"_id"`
 			CourseName string `json:"name"`
 			State      string `json:"state"`
-			CourseCode string `json:"courseCode"`
 			Term       struct {
 				ID   string `json:"_id"`
 				Name string `json:"name"`
 			} `json:"term"`
-			AssignmentsConnection struct {
-				Nodes []struct {
-					ID              string          `json:"_id"`
-					Name            string          `json:"name"`
-					DueAt           time.Time       `json:"dueAt"`
-					HTMLURL         string          `json:"htmlUrl"`
-					ScoreStatistics ScoreStatistics `json:"score_statistics,omitempty"`
-				} `json:"nodes"`
-			} `json:"assignmentsConnection"`
-			EnrollmentsConnection interface{} `json:"enrollmentsConnection"`
 		} `json:"allCourses"`
 	} `json:"data"`
 }

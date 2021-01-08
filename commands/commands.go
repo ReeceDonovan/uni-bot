@@ -9,6 +9,7 @@ import (
 	embed "github.com/Clinet/discordgo-embed"
 	"github.com/ReeceDonovan/uni-bot/request"
 	"github.com/bwmarrin/discordgo"
+	"github.com/spf13/viper"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -31,7 +32,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
 	body := ""
 	for _, course := range CourseAssignment.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection == nil {
+		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
 		body += p.Sprintf("__**%s**__\n\n", course.CourseName)
@@ -75,7 +76,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	emb.SetTitle("Available Grade Statistics: " + slug)
 	for _, course := range CourseAssignment.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
+		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
 			continue
 		}
 		for _, assignment := range course.AssignmentsConnection.Nodes {
@@ -95,4 +96,37 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "Error getting module data")
 	}
+}
+
+func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+	CourseAssignment := request.QueryAssignments()
+	valid := false
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Module Coordinator Info")
+	p := message.NewPrinter(language.English)
+	body := ""
+	for _, course := range CourseAssignment.Data.AllCourses {
+		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		valid = true
+
+		body += p.Sprintf("\n__**%s**__\n", course.CourseName)
+		for _, enrolled := range course.EnrollmentsConnection.Nodes {
+			if enrolled.Type == "TeacherEnrollment" {
+				body += p.Sprintf("[%s]("+viper.GetString("canvas.domain")+"/courses/"+course.ID+"/users/"+enrolled.User.ID+")\n", enrolled.User.Name)
+			}
+		}
+	}
+	if valid {
+		emb.SetDescription(body)
+	} else {
+		emb.SetDescription("__No Details Found__")
+	}
+	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+
 }

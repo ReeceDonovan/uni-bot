@@ -51,31 +51,34 @@ func QueryAssignments() (parsedData CourseAssignment) {
 		[]byte(`
 			{"query": "query CourseAssignments {
 				allCourses {
-				  _id
-				  name
-				  state
-				  courseCode
-				  term {
 					_id
 					name
-				  }
-				  assignmentsConnection {
+					state
+					courseCode
+					term {
+					  _id
+					  name
+					}
+					assignmentsConnection {
 					  nodes {
 						_id
 						name
 						dueAt
 						htmlUrl
 					  }
-				  }
-				  enrollmentsConnection {
-					edges {
-					  node {
-						id
+					}
+					enrollmentsConnection {
+					  nodes {
+						type
+						user {
+						  _id
+						  name
+						}
 					  }
 					}
 				  }
 				}
-			  }
+				
 			  "}`))
 
 	jsonErr := json.Unmarshal(res, &parsedData)
@@ -84,7 +87,7 @@ func QueryAssignments() (parsedData CourseAssignment) {
 	}
 
 	for _, course := range parsedData.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection == nil {
+		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
 		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
