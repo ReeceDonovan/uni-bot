@@ -11,16 +11,18 @@ import (
 type commandFunc func(session *discordgo.Session, message *discordgo.MessageCreate)
 
 var commandsMap = make(map[string]func(*discordgo.Session, *discordgo.MessageCreate))
+var helpMsgs = make(map[string]string)
 
-func command(name string, function commandFunc) {
+func command(name string, helpMessage string, function commandFunc) {
+	helpMsgs[name] = helpMessage
 	commandsMap[name] = function
 }
 
 func Register(s *discordgo.Session) {
-	// TODO: Possibly implement a help command
-	command("assignment", CurrentAssignments)
-	command("stats", CourseStats)
-	command("contact", CoordinatorInfo)
+	command("help", "List available Uni-Bot commands", HelpCommand)
+	command("assignment", "List active course assignments", CurrentAssignments)
+	command("stats", "List grade statistics from specified module", CourseStats)
+	command("contact", "List canvas user page for Professors and Course Coordinators", CoordinatorInfo)
 	s.AddHandler(messageCreate)
 }
 

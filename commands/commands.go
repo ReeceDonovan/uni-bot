@@ -17,7 +17,16 @@ import (
 // TODO: Add more commands
 // TODO: Cleanup command functions (maybe work out a helper func for created the message embed to avoid repeated code)
 
-// Test command for now, sends basic string of modules/assignments from current term as message. Will eventually be an embed and not hardcoded termID
+func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+	emb := embed.NewEmbed()
+	emb.SetColor(0xab0df9)
+	emb.SetTitle("Uni-Bot Commands")
+
+	for k, v := range helpMsgs {
+		emb.AddField("!"+k, v)
+	}
+	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+}
 
 func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 
@@ -32,7 +41,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
 	body := ""
 	for _, course := range CourseAssignment.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
 		body += p.Sprintf("__**%s**__\n\n", course.CourseName)
@@ -76,7 +85,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	emb.SetTitle("Available Grade Statistics: " + slug)
 	for _, course := range CourseAssignment.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
 			continue
 		}
 		for _, assignment := range course.AssignmentsConnection.Nodes {
@@ -107,26 +116,26 @@ func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	emb.SetColor(0xab0df9)
 
 	emb.SetTitle("Module Coordinator Info")
+
 	p := message.NewPrinter(language.English)
-	body := ""
 	for _, course := range CourseAssignment.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
+		body := ""
 		valid = true
 
-		body += p.Sprintf("\n__**%s**__\n", course.CourseName)
 		for _, enrolled := range course.EnrollmentsConnection.Nodes {
 			if enrolled.Type == "TeacherEnrollment" {
 				body += p.Sprintf("[%s]("+viper.GetString("canvas.domain")+"/courses/"+course.ID+"/users/"+enrolled.User.ID+")\n", enrolled.User.Name)
 			}
 		}
+		emb.AddField(course.CourseName, body)
 	}
 	if valid {
-		emb.SetDescription(body)
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 	} else {
-		emb.SetDescription("__No Details Found__")
+		s.ChannelMessageSend(m.ChannelID, "Error getting module data")
 	}
-	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 
 }

@@ -87,7 +87,7 @@ func QueryAssignments() (parsedData CourseAssignment) {
 	}
 
 	for _, course := range parsedData.Data.AllCourses {
-		if (len(course.Term.Name) > 10 && course.Term.Name[len(course.Term.Name)-10:] == "-completed") || course.EnrollmentsConnection.Nodes == nil {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
 		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
