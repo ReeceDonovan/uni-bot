@@ -62,10 +62,10 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if valid {
 		emb.SetDescription(body)
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 	} else {
-		emb.SetDescription("> __**No Assignments Found**__")
+		s.ChannelMessageSend(m.ChannelID, "> **No Assignments Found**")
 	}
-	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 }
 
 func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
