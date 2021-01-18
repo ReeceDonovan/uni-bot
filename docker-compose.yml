@@ -10,3 +10,5 @@ services:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CANVAS_TOKEN=${CANVAS_API_TOKEN}
+    volumes:
+      - $PWD:/bot
