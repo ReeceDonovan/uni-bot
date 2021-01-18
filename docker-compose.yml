@@ -11,4 +11,4 @@ services:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CANVAS_TOKEN=${CANVAS_API_TOKEN}
     volumes:
-      - $PWD:/bot
+      - /mnt/d/UCC/Side_Projects/uni-bot:/bot
