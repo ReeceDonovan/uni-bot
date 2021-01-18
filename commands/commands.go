@@ -22,8 +22,8 @@ func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	emb.SetColor(0xab0df9)
 	emb.SetTitle("Uni-Bot Commands")
 
-	for k, v := range helpMsgs {
-		emb.AddField("!"+k, v)
+	for key, val := range helpMsgs {
+		emb.AddField("!"+key, val)
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 }
@@ -63,7 +63,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if valid {
 		emb.SetDescription(body)
 	} else {
-		emb.SetDescription("__No Assignments Found__")
+		emb.SetDescription("> __**No Assignments Found**__")
 	}
 	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 }
@@ -72,7 +72,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cm, slug := extractCommand(m.Content)
 	log.Println(slug)
 	if cm == slug {
-		s.ChannelMessageSend(m.ChannelID, "Please enter a valid module code")
+		s.ChannelMessageSend(m.ChannelID, "> **Please enter a valid module code**")
 		return
 	}
 	slug = strings.ToUpper(strings.Split(slug, " ")[1])
@@ -84,6 +84,9 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	emb.SetColor(0xab0df9)
 
 	emb.SetTitle("Available Grade Statistics: " + slug)
+
+	body := "```\n"
+
 	for _, course := range CourseAssignment.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
 			continue
@@ -93,17 +96,21 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 				continue
 			}
 			valid = true
-			log.Println(assignment.Name)
-			emb.AddField("Max:", fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)))
-			emb.AddField("Mean:", fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)))
-			emb.AddField("Min:", fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)))
+
+			body += assignment.Name + ":\n--------------------------------------\n"
+
+			body += "	" + fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)) + "	|	"
+			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"
+			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)) + "	"
+			body += "\n\n"
 		}
 	}
-	emb.InlineAllFields()
 	if valid {
+		body += "```"
+		emb.Description = body
 		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "Error getting module data")
+		s.ChannelMessageSend(m.ChannelID, "> **No module data found**")
 	}
 }
 
@@ -135,7 +142,7 @@ func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if valid {
 		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 	} else {
-		s.ChannelMessageSend(m.ChannelID, "Error getting module data")
+		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
 	}
 
 }

@@ -21,7 +21,7 @@ func command(name string, helpMessage string, function commandFunc) {
 func Register(s *discordgo.Session) {
 	command("help", "List available Uni-Bot commands", HelpCommand)
 	command("assignment", "List active course assignments", CurrentAssignments)
-	command("stats", "List grade statistics from specified module", CourseStats)
+	command("stats", "List grade statistics from specified module e.g !stats CS2502", CourseStats)
 	command("contact", "List canvas user page for Professors and Course Coordinators", CoordinatorInfo)
 	s.AddHandler(messageCreate)
 }
