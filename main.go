@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var production *bool
-
 func main() {
 	config.InitConfig()
 

@@ -20,6 +20,6 @@ func initDefaults() {
 	viper.SetDefault("discord.token", "DISCORD_TOKEN")
 
 	// Canvas
-	viper.SetDefault("canvas.token", "CANVAS_API_TOKEN")
-	viper.SetDefault("canvas.domain", "CANVAS_API_DOMAIN")
+	viper.SetDefault("canvas.token", "CANVAS_TOKEN")
+	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
 }
