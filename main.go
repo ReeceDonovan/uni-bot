@@ -8,6 +8,7 @@ import (
 
 	"github.com/ReeceDonovan/uni-bot/commands"
 	"github.com/ReeceDonovan/uni-bot/config"
+	"github.com/ReeceDonovan/uni-bot/request"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
 )
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	commands.Register(session)
-
+	go request.Run()
 	// scheduler := gocron.NewScheduler(time.UTC)
 	// scheduler.StartAsync()
 

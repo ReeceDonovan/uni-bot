@@ -9,8 +9,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
 )
+
+var canvasCache *cache.Cache
+
+func Run() {
+	canvasCache = cache.New(1*time.Minute, 1*time.Minute)
+}
 
 // Req constructs a request and returns status code and response body
 func Req(method, slug, token string, body []byte) (int, []byte) {
@@ -46,65 +53,71 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 
 func QueryAssignments() (parsedData CourseAssignment) {
 
-	_, res := Req("POST", "/api/graphql",
-		fmt.Sprintf("%s", viper.GetString("canvas.token")),
-		[]byte(`
-			{"query": "query CourseAssignments {
-				allCourses {
-					_id
-					name
-					state
-					courseCode
-					term {
-					  _id
-					  name
-					}
-					assignmentsConnection {
-					  nodes {
+	cached, found := canvasCache.Get("cachedData")
+	if found {
+		fmt.Println("Cache found")
+		return cached.(CourseAssignment)
+	} else {
+		_, res := Req("POST", "/api/graphql",
+			fmt.Sprintf("%s", viper.GetString("canvas.token")),
+			[]byte(`
+				{"query": "query CourseAssignments {
+					allCourses {
 						_id
 						name
-						dueAt
-						htmlUrl
-					  }
-					}
-					enrollmentsConnection {
-					  nodes {
-						type
-						user {
-						  _id
-						  name
+						state
+						courseCode
+						term {
+						_id
+						name
 						}
-					  }
+						assignmentsConnection {
+						nodes {
+							_id
+							name
+							dueAt
+							htmlUrl
+						}
+						}
+						enrollmentsConnection {
+						nodes {
+							type
+							user {
+							_id
+							name
+							}
+						}
+						}
 					}
-				  }
-				}
-				
-			  "}`))
+					}
+					
+				"}`))
 
-	jsonErr := json.Unmarshal(res, &parsedData)
-	if jsonErr != nil {
-		log.Println("Error parsing response\n", jsonErr)
-	}
-
-	for _, course := range parsedData.Data.AllCourses {
-		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
-			continue
-		}
-		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
-
-		assStat := ScoreRaw{}
-
-		jsonErr := json.Unmarshal(res, &assStat)
+		jsonErr := json.Unmarshal(res, &parsedData)
 		if jsonErr != nil {
 			log.Println("Error parsing response\n", jsonErr)
 		}
 
-		for x, _ := range course.AssignmentsConnection.Nodes {
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
-		}
-	}
+		for _, course := range parsedData.Data.AllCourses {
+			if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+				continue
+			}
+			_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
 
-	return parsedData
+			assStat := ScoreRaw{}
+
+			jsonErr := json.Unmarshal(res, &assStat)
+			if jsonErr != nil {
+				log.Println("Error parsing response\n", jsonErr)
+			}
+
+			for x, _ := range course.AssignmentsConnection.Nodes {
+				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
+				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
+				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
+			}
+		}
+		canvasCache.Add("cachedData", parsedData, cache.DefaultExpiration)
+		return parsedData
+	}
 }
