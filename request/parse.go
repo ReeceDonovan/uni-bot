@@ -13,6 +13,7 @@ type CourseAssignment struct {
 					HTMLURL         string          `json:"htmlUrl"`
 					ID              string          `json:"_id"`
 					Name            string          `json:"name"`
+					PointsPossible  float64         `json:"pointsPossible"`
 					ScoreStatistics ScoreStatistics `json:"score_statistics,omitempty"`
 				} `json:"nodes"`
 			} `json:"assignmentsConnection"`

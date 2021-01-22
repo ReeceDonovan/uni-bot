@@ -97,7 +97,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			valid = true
 
-			body += assignment.Name + ":\n--------------------------------------\n"
+			body += assignment.Name + fmt.Sprintf(" (%.0f Marks)", assignment.PointsPossible) + ":\n--------------------------------------\n"
 
 			body += "	" + fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)) + "	|	"
 			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"

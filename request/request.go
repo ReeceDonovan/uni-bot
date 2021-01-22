@@ -77,6 +77,7 @@ func QueryAssignments() (parsedData CourseAssignment) {
 							name
 							dueAt
 							htmlUrl
+							pointsPossible
 						}
 						}
 						enrollmentsConnection {
