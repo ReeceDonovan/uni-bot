@@ -23,6 +23,7 @@ func Register(s *discordgo.Session) {
 	command("assignment", "List active course assignments", CurrentAssignments)
 	command("stats", "List grade statistics from specified module e.g !stats CS2502", CourseStats)
 	command("contact", "List canvas user page for Professors and Course Coordinators", CoordinatorInfo)
+	command("modules", "List canvas modules page for the current year", ModuleList)
 	s.AddHandler(messageCreate)
 }
 
