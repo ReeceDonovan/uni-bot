@@ -164,7 +164,9 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 			continue
 		}
 		valid = true
-		body += p.Sprintf("[%s]("+viper.GetString("canvas.domain")+"/courses/"+course.ID+")\n\n", course.CourseName)
+		body += p.Sprintf("**%s**\n", course.CourseName[5:])
+		body += p.Sprintf("[Canvas]("+viper.GetString("canvas.domain")+"/courses/%s) | ", course.ID)
+		body += p.Sprintf("[Book of Modules](https://www.ucc.ie/admin/registrar/modules/?mod=%s)\n\n", course.CourseCode[5:])
 	}
 	if valid {
 		emb.Description = body
