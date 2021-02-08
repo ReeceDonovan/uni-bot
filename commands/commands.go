@@ -46,7 +46,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		assignmentsExist := false
 		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if assignment.DueAt.Unix() < time.Now().AddDate(0, -2, 0).Unix() {
+			if assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix() {
 				continue
 			}
 			if assignmentsExist == false {
