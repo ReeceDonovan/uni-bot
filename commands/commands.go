@@ -44,20 +44,23 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
-		body += p.Sprintf("__**%s**__\n\n", course.CourseName)
+		assignmentsExist := false
 		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix() {
+			if assignment.DueAt.Unix() < time.Now().AddDate(0, -2, 0).Unix() {
 				continue
+			}
+			if assignmentsExist == false {
+				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
+				valid, assignmentsExist = true, true
 			}
 			days := int(time.Until(assignment.DueAt).Hours() / 24)
 			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
 			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
-			body += p.Sprintf("%s ", assignment.Name)
-			body += p.Sprintf("[%s]\n", (assignment.DueAt.UTC().Format("15:04 - 02/01")))
-			body += p.Sprintf("Due in: **%d Days, ", days)
+			body += p.Sprintf("%s\n", (assignment.DueAt.UTC().Format("02 Jan 2006 15:04")))
+			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
+			body += p.Sprintf("**%d Days, ", days)
 			body += p.Sprintf("%d Hours, ", hours)
-			body += p.Sprintf("%d Minutes", minutes)
-			body += p.Sprintf("**\n%s\n\n", assignment.HTMLURL)
+			body += p.Sprintf("%d Minutes**\n\n", minutes)
 		}
 	}
 	if valid {
