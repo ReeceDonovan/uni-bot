@@ -18,7 +18,7 @@ func command(name string, helpMessage string, function commandFunc) {
 	commandsMap[name] = function
 }
 
-func Register(s *discordgo.Session) {
+func RegisterCommands(s *discordgo.Session) {
 	command("help", "List available Uni-Bot commands", HelpCommand)
 	command("assignment", "List active course assignments", CurrentAssignments)
 	command("stats", "List grade statistics from specified module e.g !stats CS2502", CourseStats)

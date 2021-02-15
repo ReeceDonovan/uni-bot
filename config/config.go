@@ -15,11 +15,14 @@ func InitConfig() {
 }
 
 func initDefaults() {
-	// Discord-Bot
+	// Discord
 	viper.SetDefault("discord.prefix", "!")
 	viper.SetDefault("discord.token", "DISCORD_TOKEN")
+	viper.SetDefault("discord.cs.id", "DISCORD_CS_ID")
+	viper.SetDefault("discord.dh.id", "DISCORD_DH_ID")
 
 	// Canvas
-	viper.SetDefault("canvas.token", "CANVAS_TOKEN")
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
+	viper.SetDefault("canvas.cs.token", "CANVAS_CS_TOKEN")
+	viper.SetDefault("canvas.dh.token", "CANVAS_DH_TOKEN")
 }

@@ -11,3 +11,5 @@ services:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CANVAS_TOKEN=${CANVAS_TOKEN}
       - CANVAS_DOMAIN=${CANVAS_DOMAIN}
+    volumes:
+      - "./config:/config"

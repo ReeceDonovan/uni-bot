@@ -51,15 +51,22 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 
 // TODO: Might move everything from here down to different file for tidyness if we need other query commands, but ah sur. Also gotta change default struct variable names from the autogen
 
-func QueryAssignments() (parsedData CourseAssignment) {
+func QueryAssignments(serverID string) (parsedData CourseAssignment) {
 
-	cached, found := canvasCache.Get("cachedData")
+	token := viper.GetString("canvas.cs.token")
+
+	if serverID == viper.GetString("discord.dh.id") {
+		token = viper.GetString("canvas.dh.token")
+	} else {
+		serverID = viper.GetString("discord.cs.id")
+	}
+	cached, found := canvasCache.Get(fmt.Sprintf("%s-Data", serverID))
 	if found {
-		fmt.Println("Cache found")
+		log.Println("Cache found")
 		return cached.(CourseAssignment)
 	} else {
 		_, res := Req("POST", "/api/graphql",
-			fmt.Sprintf("%s", viper.GetString("canvas.token")),
+			fmt.Sprintf("%s", token),
 			[]byte(`
 				{"query": "query CourseAssignments {
 					allCourses {
@@ -98,12 +105,11 @@ func QueryAssignments() (parsedData CourseAssignment) {
 		if jsonErr != nil {
 			log.Println("Error parsing response\n", jsonErr)
 		}
-
 		for _, course := range parsedData.Data.AllCourses {
 			if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 				continue
 			}
-			_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", viper.GetString("canvas.token")), nil)
+			_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", fmt.Sprintf("%s", token), nil)
 
 			assStat := ScoreRaw{}
 
@@ -118,7 +124,7 @@ func QueryAssignments() (parsedData CourseAssignment) {
 				course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
 			}
 		}
-		canvasCache.Add("cachedData", parsedData, cache.DefaultExpiration)
+		canvasCache.Add(fmt.Sprintf("%s-Data", serverID), parsedData, cache.DefaultExpiration)
 		return parsedData
 	}
 }

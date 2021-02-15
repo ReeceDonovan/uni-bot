@@ -31,7 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	commands.Register(session)
+	commands.RegisterCommands(session)
 	go request.Run()
 	// scheduler := gocron.NewScheduler(time.UTC)
 	// scheduler.StartAsync()

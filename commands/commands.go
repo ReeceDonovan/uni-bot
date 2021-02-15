@@ -30,7 +30,7 @@ func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	CourseAssignment := request.QueryAssignments()
+	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
 	emb := embed.NewEmbed()
@@ -79,7 +79,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	slug = strings.ToUpper(strings.Split(slug, " ")[1])
-	CourseAssignment := request.QueryAssignments()
+	CourseAssignment := request.QueryAssignments(m.GuildID)
 
 	valid := false
 	emb := embed.NewEmbed()
@@ -118,7 +118,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
-	CourseAssignment := request.QueryAssignments()
+	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
 	emb := embed.NewEmbed()
@@ -151,7 +151,7 @@ func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
-	CourseAssignment := request.QueryAssignments()
+	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
 	emb := embed.NewEmbed()
