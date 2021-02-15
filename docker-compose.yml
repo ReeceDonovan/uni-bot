@@ -9,7 +9,11 @@ services:
     ## Vars to put in override:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - CANVAS_TOKEN=${CANVAS_TOKEN}
+      - DISCORD_CS_ID=${DISCORD_CS_ID}
+      - DISCORD_DH_ID=${DISCORD_DH_ID}
+      - CANVAS_CS_TOKEN=${CANVAS_CS_TOKEN}
+      - CANVAS_DH_TOKEN=${CANVAS_DH_TOKEN}
       - CANVAS_DOMAIN=${CANVAS_DOMAIN}
+
     volumes:
       - "./config:/config"
