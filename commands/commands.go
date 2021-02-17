@@ -167,10 +167,24 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 			continue
 		}
 		valid = true
+		graded := false
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if assignment.ScoreStatistics.Mean != 0 {
+				graded = true
+				break
+			}
+		}
 		body += p.Sprintf("**%s**\n", course.CourseName[5:])
 		body += p.Sprintf("[Canvas]("+viper.GetString("canvas.domain")+"/courses/%s) | ", course.ID)
-		body += p.Sprintf("[Book of Modules](https://www.ucc.ie/admin/registrar/modules/?mod=%s)\n\n", course.CourseCode[5:])
+		body += p.Sprintf("[UCC](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | ", course.CourseCode[5:])
+		switch graded {
+		case true:
+			body += "Stats: ✓\n\n"
+		case false:
+			body += "Stats: ✗\n\n"
+		}
 	}
+
 	if valid {
 		emb.Description = body
 		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
