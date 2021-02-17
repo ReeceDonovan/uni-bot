@@ -166,17 +166,10 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
-		grades := "No"
-		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if assignment.ScoreStatistics.Mean != 0.0 {
-				grades = "Yes"
-			}
-		}
 		valid = true
 		body += p.Sprintf("**%s**\n", course.CourseName[5:])
 		body += p.Sprintf("[Canvas]("+viper.GetString("canvas.domain")+"/courses/%s) | ", course.ID)
-		body += p.Sprintf("[Book of Modules](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | ", course.CourseCode[5:])
-		body += p.Sprintf("Stats: %s\n\n", grades)
+		body += p.Sprintf("[Book of Modules](https://www.ucc.ie/admin/registrar/modules/?mod=%s)\n\n", course.CourseCode[5:])
 	}
 	if valid {
 		emb.Description = body
