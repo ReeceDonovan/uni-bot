@@ -56,11 +56,12 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 			days := int(time.Until(assignment.DueAt).Hours() / 24)
 			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
 			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
-			body += p.Sprintf("%s\n", (assignment.DueAt.UTC().Format("02 Jan 2006 15:04")))
+			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
 			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
 			body += p.Sprintf("**%d Days, ", days)
 			body += p.Sprintf("%d Hours, ", hours)
-			body += p.Sprintf("%d Minutes**\n\n", minutes)
+			body += p.Sprintf("%d Minutes** 	|	", minutes)
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.UTC().Format("02 Jan 2006 15:04")))
 		}
 	}
 	if valid {
