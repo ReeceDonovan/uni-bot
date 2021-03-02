@@ -19,6 +19,7 @@ func initDefaults() {
 	viper.SetDefault("discord.prefix", "!")
 	viper.SetDefault("discord.token", "DISCORD_TOKEN")
 	viper.SetDefault("discord.cs.id", "DISCORD_CS_ID")
+	viper.SetDefault("discord.cs.alert", "DISCORD_CS_ALERT")
 	viper.SetDefault("discord.dh.id", "DISCORD_DH_ID")
 
 	// Canvas

@@ -193,3 +193,46 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
 	}
 }
+
+func DueAssignments(s *discordgo.Session) {
+
+	CourseAssignment := request.QueryAssignments(viper.GetString("discord.cs.id"))
+	valid := false
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Assignments Due Today")
+	p := message.NewPrinter(language.English)
+	body := ""
+	for _, course := range CourseAssignment.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		assignmentsExist := false
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if (assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix()) || ((assignment.DueAt.Unix() - time.Now().AddDate(0, 0, 0).Unix()) > 57600) {
+				continue
+			}
+			if assignmentsExist == false {
+				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
+				valid, assignmentsExist = true, true
+			}
+			days := int(time.Until(assignment.DueAt).Hours() / 24)
+			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
+			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
+			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
+			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
+			body += p.Sprintf("**%d Days, ", days)
+			body += p.Sprintf("%d Hours, ", hours)
+			body += p.Sprintf("%d Minutes** 	|	", minutes)
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.UTC().Format("02 Jan 2006 15:04")))
+		}
+	}
+	if valid {
+		s.ChannelMessageSend(viper.GetString(("discord.cs.alert")), "<@&631495001573949450>")
+		emb.SetDescription(body)
+		s.ChannelMessageSendEmbed(viper.GetString(("discord.cs.alert")), emb.MessageEmbed)
+	}
+}

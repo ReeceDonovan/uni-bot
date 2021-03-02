@@ -5,11 +5,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/ReeceDonovan/uni-bot/commands"
 	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/ReeceDonovan/uni-bot/request"
 	"github.com/bwmarrin/discordgo"
+	"github.com/go-co-op/gocron"
 	"github.com/spf13/viper"
 )
 
@@ -33,10 +35,10 @@ func main() {
 
 	commands.RegisterCommands(session)
 	go request.Run()
-	// scheduler := gocron.NewScheduler(time.UTC)
-	// scheduler.StartAsync()
+	scheduler := gocron.NewScheduler(time.UTC)
+	scheduler.StartAsync()
 
-	// scheduler.Every(1).Day().At("10:30").Do(commands.RefreshSchedule, scheduler, session)
+	scheduler.Every(1).Day().At("12:35").Do(commands.DueAssignments, session)
 
 	log.Println("Bot is Running")
 	sc := make(chan os.Signal, 1)
