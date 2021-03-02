@@ -26,4 +26,7 @@ func initDefaults() {
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
 	viper.SetDefault("canvas.cs.token", "CANVAS_CS_TOKEN")
 	viper.SetDefault("canvas.dh.token", "CANVAS_DH_TOKEN")
+
+	// Misc
+	viper.SetDefault("scheduler.trigger", "SCHEDULER_TRIGGER")
 }

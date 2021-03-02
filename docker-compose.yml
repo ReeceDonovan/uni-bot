@@ -15,6 +15,7 @@ services:
       - CANVAS_CS_TOKEN=${CANVAS_CS_TOKEN}
       - CANVAS_DH_TOKEN=${CANVAS_DH_TOKEN}
       - CANVAS_DOMAIN=${CANVAS_DOMAIN}
+      - SCHEDULER_TRIGGER=${SCHEDULER_TRIGGER}
 
     volumes:
       - "./config:/config"

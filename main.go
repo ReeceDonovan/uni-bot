@@ -34,11 +34,15 @@ func main() {
 	}
 
 	commands.RegisterCommands(session)
+
 	go request.Run()
+
+	// Scheduling
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.StartAsync()
-
-	scheduler.Every(1).Day().At("12:35").Do(commands.DueAssignments, session)
+	schedulerTrigger := viper.GetString("scheduler.trigger")
+	log.Println("Scheduling Due Assignments Check for " + schedulerTrigger)
+	scheduler.Every(1).Day().At(schedulerTrigger).Do(commands.DueAssignments, session)
 
 	log.Println("Bot is Running")
 	sc := make(chan os.Signal, 1)
