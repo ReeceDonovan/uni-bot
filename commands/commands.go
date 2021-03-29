@@ -31,6 +31,11 @@ func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	location, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		panic(err)
+	}
+
 	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
@@ -48,22 +53,22 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		assignmentsExist := false
 		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if assignment.DueAt.Local().Unix() < time.Now().AddDate(0, 0, 0).Unix() {
+			if assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix() {
 				continue
 			}
 			if assignmentsExist == false {
 				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
 				valid, assignmentsExist = true, true
 			}
-			days := int(time.Until(assignment.DueAt.Local()).Hours() / 24)
-			hours := int(time.Until(assignment.DueAt.Local()).Hours() - float64(int(days*24)))
-			minutes := int(time.Until(assignment.DueAt.Local()).Minutes() - float64(int(days*24*60)+int(hours*60)))
+			days := int(time.Until(assignment.DueAt).Hours() / 24)
+			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
+			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
 			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
 			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
 			body += p.Sprintf("**%d Days, ", days)
 			body += p.Sprintf("%d Hours, ", hours)
 			body += p.Sprintf("%d Minutes** 	|	", minutes)
-			body += p.Sprintf("%s\n\n", (assignment.DueAt.Local().Format("02 Jan 2006 15:04")))
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.In(location).Format("02 Jan 2006 15:04")))
 		}
 	}
 	if valid {
@@ -200,6 +205,10 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func DueAssignments(s *discordgo.Session) {
 
+	location, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		panic(err)
+	}
 	CourseAssignment := request.QueryAssignments(viper.GetString("discord.cs.id"))
 	valid := false
 
@@ -216,22 +225,22 @@ func DueAssignments(s *discordgo.Session) {
 		}
 		assignmentsExist := false
 		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if (assignment.DueAt.Local().Unix() < time.Now().Local().AddDate(0, 0, 0).Unix()) || ((assignment.DueAt.Unix() - time.Now().AddDate(0, 0, 0).Unix()) > 57600) {
+			if (assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix()) || ((assignment.DueAt.Unix() - time.Now().AddDate(0, 0, 0).Unix()) > 57600) {
 				continue
 			}
 			if assignmentsExist == false {
 				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
 				valid, assignmentsExist = true, true
 			}
-			days := int(time.Until(assignment.DueAt.Local()).Hours() / 24)
-			hours := int(time.Until(assignment.DueAt.Local()).Hours() - float64(int(days*24)))
-			minutes := int(time.Until(assignment.DueAt.Local()).Minutes() - float64(int(days*24*60)+int(hours*60)))
+			days := int(time.Until(assignment.DueAt).Hours() / 24)
+			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
+			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
 			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
 			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
 			body += p.Sprintf("**%d Days, ", days)
 			body += p.Sprintf("%d Hours, ", hours)
 			body += p.Sprintf("%d Minutes** 	|	", minutes)
-			body += p.Sprintf("%s\n\n", (assignment.DueAt.Local().Format("02 Jan 2006 15:04")))
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.In(location).Format("02 Jan 2006 15:04")))
 		}
 	}
 	if valid {
