@@ -38,7 +38,7 @@ func main() {
 	go request.Run()
 
 	// Scheduling
-	scheduler := gocron.NewScheduler(time.UTC)
+	scheduler := gocron.NewScheduler(time.Local)
 	scheduler.StartAsync()
 	schedulerTrigger := viper.GetString("scheduler.trigger")
 	log.Println("Scheduling Due Assignments Check for " + schedulerTrigger)
