@@ -18,6 +18,7 @@ import (
 // TODO: Cleanup command functions (maybe work out a helper func for created the message embed to avoid repeated code)
 
 func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+
 	emb := embed.NewEmbed()
 	emb.SetColor(0xab0df9)
 	emb.SetTitle("Uni-Bot Commands")
@@ -30,6 +31,11 @@ func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	location, err := time.LoadLocation("Europe/Dublin")
+	if err != nil {
+		panic(err)
+	}
+
 	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
@@ -40,6 +46,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	emb.SetTitle("Active Assignments")
 	p := message.NewPrinter(language.English)
 	body := ""
+
 	for _, course := range CourseAssignment.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
@@ -61,7 +68,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 			body += p.Sprintf("**%d Days, ", days)
 			body += p.Sprintf("%d Hours, ", hours)
 			body += p.Sprintf("%d Minutes** 	|	", minutes)
-			body += p.Sprintf("%s\n\n", (assignment.DueAt.UTC().Format("02 Jan 2006 15:04")))
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.In(location).Format("02 Jan 2006 15:04")))
 		}
 	}
 	if valid {
@@ -73,6 +80,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
+
 	cm, slug := extractCommand(m.Content)
 	log.Println(slug)
 	if cm == slug {
@@ -119,6 +127,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+
 	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
@@ -148,10 +157,10 @@ func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
 	}
-
 }
 
 func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
+
 	CourseAssignment := request.QueryAssignments(m.GuildID)
 	valid := false
 
@@ -163,6 +172,7 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	p := message.NewPrinter(language.English)
 	body := ""
+
 	for _, course := range CourseAssignment.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
@@ -185,7 +195,6 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 			body += "Stats: ✗\n\n"
 		}
 	}
-
 	if valid {
 		emb.Description = body
 		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
@@ -196,6 +205,10 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func DueAssignments(s *discordgo.Session) {
 
+	location, err := time.LoadLocation("Europe/Dublin")
+	if err != nil {
+		panic(err)
+	}
 	CourseAssignment := request.QueryAssignments(viper.GetString("discord.cs.id"))
 	valid := false
 
@@ -227,7 +240,7 @@ func DueAssignments(s *discordgo.Session) {
 			body += p.Sprintf("**%d Days, ", days)
 			body += p.Sprintf("%d Hours, ", hours)
 			body += p.Sprintf("%d Minutes** 	|	", minutes)
-			body += p.Sprintf("%s\n\n", (assignment.DueAt.UTC().Format("02 Jan 2006 15:04")))
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.In(location).Format("02 Jan 2006 15:04")))
 		}
 	}
 	if valid {
