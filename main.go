@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ReeceDonovan/uni-bot/commands"
 	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
@@ -28,6 +29,8 @@ func main() {
 		log.Println("Failed to connect bot")
 		os.Exit(1)
 	}
+
+	commands.RegisterCommands(session)
 
 	log.Println("Bot is Running")
 	sc := make(chan os.Signal, 1)
