@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var path = "./config/serverData.csv"
+var path = "/config/serverData.csv"
 
 type ServerData struct {
 	ServerID     string
