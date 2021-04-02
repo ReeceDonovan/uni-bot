@@ -235,3 +235,35 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	courseAssignments := api.GetAssignments(m.GuildID)
+	valid := false
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Module Coordinator Info")
+
+	p := message.NewPrinter(language.English)
+	for _, course := range courseAssignments.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		body := ""
+		valid = true
+
+		for _, enrolled := range course.EnrollmentsConnection.Nodes {
+			if enrolled.Type == "TeacherEnrollment" {
+				body += p.Sprintf("[%s]("+viper.GetString("canvas.domain")+"/courses/"+course.ID+"/users/"+enrolled.User.ID+")\n", enrolled.User.Name)
+			}
+		}
+		emb.AddField(course.CourseName, body)
+	}
+	if valid {
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
+	}
+}
