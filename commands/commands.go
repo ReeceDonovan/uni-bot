@@ -187,3 +187,51 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
 	}
 }
+
+func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	cm, slug := extractCommand(m.Content)
+	log.Println(slug)
+	if cm == slug {
+		s.ChannelMessageSend(m.ChannelID, "> **Please enter a valid module code**")
+		return
+	}
+	slug = strings.ToUpper(strings.Split(slug, " ")[1])
+	courseAssignments := api.GetStats(m.GuildID)
+
+	valid := false
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Available Grade Statistics: " + slug)
+
+	body := "```\n"
+
+	for _, course := range courseAssignments.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
+			continue
+		}
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if assignment.ScoreStatistics.Max == 0 {
+				continue
+			}
+			valid = true
+
+			body += assignment.Name + fmt.Sprintf(" (%.0f Marks)", assignment.PointsPossible) + ":\n--------------------------------------\n"
+
+			body += "	" + fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)) + "	|	"
+			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"
+			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)) + "	"
+			body += "\n\n"
+		}
+	}
+	if valid {
+		body += "```"
+		emb.Description = body
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **No module data found**")
+	}
+}
+
