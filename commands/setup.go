@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
 )
@@ -20,8 +21,8 @@ func command(name string, helpMessage string, function commandFunc) {
 
 func RegisterCommands(s *discordgo.Session) {
 	command("help", "List available Uni-Bot commands", HelpCommand)
-	command("link", "Link this server and channel with canvas token e.g !link <Token>", Link)
 	command("assignment", "List active course assignments", Assignments)
+	command("link", "[Owner Only] Link this server and channel with canvas token e.g !link <Token>", Link)
 	s.AddHandler(messageCreate)
 }
 
@@ -36,11 +37,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func callCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.GuildID == "" {
+		s.ChannelMessageSend(m.ChannelID, "> **Please use this bot in a properly linked server**")
+		return
+	}
 	commandStr, _ := extractCommand(m.Content)
 	if command, ok := commandsMap[commandStr]; ok {
 		log.Println("Command Triggered")
-		command(s, m)
-		return
+		sr := viper.Get("servers.active").([]config.ServerData)
+		for _, ser := range sr {
+			if m.GuildID == ser.ServerID || commandStr == "link" {
+				command(s, m)
+				return
+			}
+		}
+		s.ChannelMessageSend(m.ChannelID, "> **Server is not linked. Have the server owner use the !link command with a canvas account token in the channel you wish to receive assignment alerts**")
 	}
 }
 

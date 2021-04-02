@@ -28,4 +28,7 @@ func initDefaults() {
 
 	// Canvas
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
+
+	// Misc
+	viper.SetDefault("scheduler.trigger", "SCHEDULER_TRIGGER")
 }

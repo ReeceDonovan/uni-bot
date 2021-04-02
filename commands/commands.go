@@ -8,6 +8,7 @@ import (
 	embed "github.com/Clinet/discordgo-embed"
 	"github.com/ReeceDonovan/uni-bot/api"
 	"github.com/ReeceDonovan/uni-bot/config"
+	"github.com/spf13/viper"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 
@@ -89,5 +90,55 @@ func Assignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "> **No Assignments Found**")
+	}
+}
+
+func DueAssignments(s *discordgo.Session) {
+	sr := viper.Get("servers.active").([]config.ServerData)
+	for _, ser := range sr {
+		dueAssignmentsHelper(s, ser.ServerID, ser.AlertChannel)
+	}
+}
+
+func dueAssignmentsHelper(s *discordgo.Session, serverID string, alertChannelID string) {
+
+	CourseAssignment := api.GetAssignments(serverID)
+	valid := false
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Assignments Due Today")
+	p := message.NewPrinter(language.English)
+	body := ""
+	for _, course := range CourseAssignment.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		assignmentsExist := false
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if (assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix()) || ((assignment.DueAt.Unix() - time.Now().AddDate(0, 0, 0).Unix()) > 57600) {
+				continue
+			}
+			if assignmentsExist == false {
+				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
+				valid, assignmentsExist = true, true
+			}
+			days := int(time.Until(assignment.DueAt).Hours() / 24)
+			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
+			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
+			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
+			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
+			body += p.Sprintf("**%d Days, ", days)
+			body += p.Sprintf("%d Hours, ", hours)
+			body += p.Sprintf("%d Minutes** 	|	", minutes)
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.Format("02 Jan 2006 15:04")))
+		}
+	}
+	if valid {
+		s.ChannelMessageSend(alertChannelID, "@here")
+		emb.SetDescription(body)
+		s.ChannelMessageSendEmbed(alertChannelID, emb.MessageEmbed)
 	}
 }
