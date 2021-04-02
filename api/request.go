@@ -66,3 +66,40 @@ func GetAssignments(sID string) (parsedData *CourseAssignment) {
 	}
 	return parsedData
 }
+
+func GetStats(sID string) (parsedData *CourseAssignment) {
+	var token string
+
+	sr := viper.Get("servers.active").([]config.ServerData)
+	for _, s := range sr {
+		if sID == s.ServerID {
+			token = s.CanvasToken
+		}
+	}
+	_, res := Req("POST", "/api/graphql", token, AssignmentQuery)
+	jsonErr := json.Unmarshal(res, &parsedData)
+	if jsonErr != nil {
+		log.Println("Error parsing response: ", jsonErr)
+	}
+	for _, course := range parsedData.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", token, nil)
+
+		assStat := ScoreRaw{}
+
+		jsonErr := json.Unmarshal(res, &assStat)
+		if jsonErr != nil {
+			log.Println("Error parsing response\n", jsonErr)
+		}
+
+		for x, _ := range course.AssignmentsConnection.Nodes {
+			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
+			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
+			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
+		}
+	}
+	// canvasCache.Add(fmt.Sprintf("%s-Data", serverID), parsedData, cache.DefaultExpiration)
+	return parsedData
+}
