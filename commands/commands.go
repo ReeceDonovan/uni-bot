@@ -3,20 +3,91 @@ package commands
 import (
 	"log"
 	"strings"
+	"time"
 
+	embed "github.com/Clinet/discordgo-embed"
+	"github.com/ReeceDonovan/uni-bot/api"
 	"github.com/ReeceDonovan/uni-bot/config"
-	"github.com/ReeceDonovan/uni-bot/request"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+
 	"github.com/bwmarrin/discordgo"
 )
 
+func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	emb := embed.NewEmbed()
+	emb.SetColor(0xab0df9)
+	emb.SetTitle("Uni-Bot Commands")
+
+	for key, val := range helpMsgs {
+		emb.AddField("!"+key, val)
+	}
+	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+}
+
 func Link(s *discordgo.Session, m *discordgo.MessageCreate) {
+	g, _ := s.State.Guild(m.GuildID)
+	if g.OwnerID != m.Author.ID {
+		s.ChannelMessageSend(m.ChannelID, "> **Only the server's owner can access this command**")
+		return
+	}
 	_, slug := extractCommand(m.Content)
-	log.Println(strings.Fields(slug)[1])
-	info := strings.Fields(slug)[1:]
-	config.UpdateData(&config.ServerData{info[0], info[1], info[2]})
+	if len(strings.Fields(slug)) != 2 {
+		log.Println("Link command error: Insufficient details")
+		s.ChannelMessageSend(m.ChannelID, "> **Link Failed: Please run command in channel you'd like to link for announcements. !link <CanvasToken>**")
+		return
+	}
+	info := []string{m.GuildID, strings.Fields(slug)[1], m.ChannelID}
+	upErr := config.UpdateData(&config.ServerData{ServerID: info[0], CanvasToken: info[1], AlertChannel: info[2]})
+	if upErr != nil {
+		log.Println(upErr)
+		s.ChannelMessageSend(m.ChannelID, "> **Link Error: Server already linked**")
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **Link Successful**")
+	}
 }
 
 func Assignments(s *discordgo.Session, m *discordgo.MessageCreate) {
-	a := request.GetAssignments(m.GuildID)
-	log.Println(a)
+
+	courseAssignments := api.GetAssignments(m.GuildID)
+	valid := false
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Active Assignments")
+	p := message.NewPrinter(language.English)
+	body := ""
+	for _, course := range courseAssignments.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		assignmentsExist := false
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix() {
+				continue
+			}
+			if assignmentsExist == false {
+				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
+				valid, assignmentsExist = true, true
+			}
+			days := int(time.Until(assignment.DueAt).Hours() / 24)
+			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
+			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
+			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
+			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
+			body += p.Sprintf("**%d Days, ", days)
+			body += p.Sprintf("%d Hours, ", hours)
+			body += p.Sprintf("%d Minutes** 	|	", minutes)
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.Format("02 Jan 2006 15:04")))
+		}
+	}
+	if valid {
+		emb.SetDescription(body)
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **No Assignments Found**")
+	}
 }

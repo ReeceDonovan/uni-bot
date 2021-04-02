@@ -2,8 +2,11 @@ package config
 
 import (
 	"encoding/csv"
+	"errors"
 	"log"
 	"os"
+
+	"github.com/spf13/viper"
 )
 
 var path = "./config/serverData.csv"
@@ -14,13 +17,18 @@ type ServerData struct {
 	AlertChannel string
 }
 
-func UpdateData(serverItem *ServerData) {
+func UpdateData(serverItem *ServerData) error {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
-
+	sr := viper.Get("servers.active").([]ServerData)
+	for _, s := range sr {
+		if serverItem.ServerID == s.ServerID {
+			return errors.New(serverItem.ServerID + " is already linked")
+		}
+	}
 	var data [][]string
 	data = append(data, []string{serverItem.ServerID, serverItem.CanvasToken, serverItem.AlertChannel})
 
@@ -30,7 +38,9 @@ func UpdateData(serverItem *ServerData) {
 	if err := w.Error(); err != nil {
 		log.Fatal(err)
 	}
+	initServers()
 	log.Println("Appended successfully")
+	return nil
 }
 
 func ReadData() []ServerData {
@@ -49,8 +59,7 @@ func ReadData() []ServerData {
 	}
 
 	for _, recs := range records {
-		data = append(data, *&ServerData{recs[0], recs[1], recs[2]})
-
+		data = append(data, ServerData{recs[0], recs[1], recs[2]})
 	}
 	return data
 }

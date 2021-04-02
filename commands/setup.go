@@ -19,7 +19,9 @@ func command(name string, helpMessage string, function commandFunc) {
 }
 
 func RegisterCommands(s *discordgo.Session) {
-	command("link", "Link server", Link)
+	command("help", "List available Uni-Bot commands", HelpCommand)
+	command("link", "Link this server and channel with canvas token e.g !link <Token>", Link)
+	command("assignment", "List active course assignments", Assignments)
 	s.AddHandler(messageCreate)
 }
 

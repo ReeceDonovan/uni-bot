@@ -1,4 +1,4 @@
-package request
+package api
 
 var AssignmentQuery = []byte(`
 {"query": "query CourseAssignments {

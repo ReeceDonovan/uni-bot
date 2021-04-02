@@ -10,17 +10,22 @@ var Active []ServerData
 
 // InitConfig loads env vars into viper
 func InitConfig() {
-
-	Active = ReadData()
 	initDefaults()
-
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 }
 
+func initServers() {
+	Active = ReadData()
+	viper.SetDefault("servers.active", Active)
+}
+
 func initDefaults() {
+	initServers()
 	// Discord
 	viper.SetDefault("discord.prefix", "!")
 	viper.SetDefault("discord.token", "DISCORD_TOKEN")
-	viper.SetDefault("servers.active", Active)
+
+	// Canvas
+	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
 }
