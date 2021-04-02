@@ -22,6 +22,9 @@ func command(name string, helpMessage string, function commandFunc) {
 func RegisterCommands(s *discordgo.Session) {
 	command("help", "List available Uni-Bot commands", HelpCommand)
 	command("assignment", "List active course assignments", Assignments)
+	command("stats", "List grade statistics from specified module e.g !stats CS2502", CourseStats)
+	command("contact", "List canvas user page for Professors and Course Coordinators", CoordinatorInfo)
+	command("modules", "List canvas modules page for the current year", ModuleList)
 	command("link", "[Owner Only] Link this server and channel with canvas token e.g !link <Token>", Link)
 	s.AddHandler(messageCreate)
 }
