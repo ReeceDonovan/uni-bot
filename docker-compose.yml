@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   discord-bot:
-    container_name: uni-bot.local
+    container_name: uni-bot-dev.local
     # command: modd # Hot reloading
     build: .
     ports:
@@ -9,15 +9,17 @@ services:
     ## Vars to put in override:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - DISCORD_CS_ID=${DISCORD_CS_ID}
-      - DISCORD_CS_ALERT=${DISCORD_CS_ALERT}
-      - DISCORD_DH_ID=${DISCORD_DH_ID}
-      - CANVAS_CS_TOKEN=${CANVAS_CS_TOKEN}
-      - CANVAS_DH_TOKEN=${CANVAS_DH_TOKEN}
       - CANVAS_DOMAIN=${CANVAS_DOMAIN}
       - SCHEDULER_TRIGGER=${SCHEDULER_TRIGGER}
-
     volumes:
       - "./config:/config"
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 500M
+        reservations:
+          cpus: "0.25"
+          memory: 200M

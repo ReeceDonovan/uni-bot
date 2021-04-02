@@ -1,8 +1,6 @@
-package request
+package api
 
 import "time"
-
-// TODO: Clean up struct, think of any other useful data we could use from the api
 
 type CourseAssignment struct {
 	Data struct {

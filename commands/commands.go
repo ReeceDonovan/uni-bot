@@ -7,15 +7,14 @@ import (
 	"time"
 
 	embed "github.com/Clinet/discordgo-embed"
-	"github.com/ReeceDonovan/uni-bot/request"
-	"github.com/bwmarrin/discordgo"
+	"github.com/ReeceDonovan/uni-bot/api"
+	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/spf13/viper"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
-)
 
-// TODO: Add more commands
-// TODO: Cleanup command functions (maybe work out a helper func for created the message embed to avoid repeated code)
+	"github.com/bwmarrin/discordgo"
+)
 
 func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 
@@ -29,8 +28,31 @@ func HelpCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 }
 
-func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
-	CourseAssignment := request.QueryAssignments(m.GuildID)
+func Link(s *discordgo.Session, m *discordgo.MessageCreate) {
+	g, _ := s.State.Guild(m.GuildID)
+	if g.OwnerID != m.Author.ID {
+		s.ChannelMessageSend(m.ChannelID, "> **Only the server's owner can access this command**")
+		return
+	}
+	_, slug := extractCommand(m.Content)
+	if len(strings.Fields(slug)) != 2 {
+		log.Println("Link command error: Insufficient details")
+		s.ChannelMessageSend(m.ChannelID, "> **Link Failed: Please run command in channel you'd like to link for announcements. !link <CanvasToken>**")
+		return
+	}
+	info := []string{m.GuildID, strings.Fields(slug)[1], m.ChannelID}
+	upErr := config.UpdateData(&config.ServerData{ServerID: info[0], CanvasToken: info[1], AlertChannel: info[2]})
+	if upErr != nil {
+		log.Println(upErr)
+		s.ChannelMessageSend(m.ChannelID, "> **Link Error: Server already linked**")
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **Link Successful**")
+	}
+}
+
+func Assignments(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	courseAssignments := api.GetAssignments(m.GuildID)
 	valid := false
 
 	emb := embed.NewEmbed()
@@ -40,8 +62,7 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	emb.SetTitle("Active Assignments")
 	p := message.NewPrinter(language.English)
 	body := ""
-
-	for _, course := range CourseAssignment.Data.AllCourses {
+	for _, course := range courseAssignments.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
@@ -73,89 +94,59 @@ func CurrentAssignments(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
-
-	cm, slug := extractCommand(m.Content)
-	log.Println(slug)
-	if cm == slug {
-		s.ChannelMessageSend(m.ChannelID, "> **Please enter a valid module code**")
-		return
-	}
-	slug = strings.ToUpper(strings.Split(slug, " ")[1])
-	CourseAssignment := request.QueryAssignments(m.GuildID)
-
-	valid := false
-	emb := embed.NewEmbed()
-
-	emb.SetColor(0xab0df9)
-
-	emb.SetTitle("Available Grade Statistics: " + slug)
-
-	body := "```\n"
-
-	for _, course := range CourseAssignment.Data.AllCourses {
-		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
-			continue
-		}
-		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if assignment.ScoreStatistics.Max == 0 {
-				continue
-			}
-			valid = true
-
-			body += assignment.Name + fmt.Sprintf(" (%.0f Marks)", assignment.PointsPossible) + ":\n--------------------------------------\n"
-
-			body += "	" + fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)) + "	|	"
-			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"
-			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)) + "	"
-			body += "\n\n"
-		}
-	}
-	if valid {
-		body += "```"
-		emb.Description = body
-		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
-	} else {
-		s.ChannelMessageSend(m.ChannelID, "> **No module data found**")
+func DueAssignments(s *discordgo.Session) {
+	sr := viper.Get("servers.active").([]config.ServerData)
+	for _, ser := range sr {
+		dueAssignmentsHelper(s, ser.ServerID, ser.AlertChannel)
 	}
 }
 
-func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+func dueAssignmentsHelper(s *discordgo.Session, serverID string, alertChannelID string) {
 
-	CourseAssignment := request.QueryAssignments(m.GuildID)
+	courseAssignments := api.GetAssignments(serverID)
 	valid := false
 
 	emb := embed.NewEmbed()
 
 	emb.SetColor(0xab0df9)
 
-	emb.SetTitle("Module Coordinator Info")
-
+	emb.SetTitle("Assignments Due Today")
 	p := message.NewPrinter(language.English)
-	for _, course := range CourseAssignment.Data.AllCourses {
+	body := ""
+	for _, course := range courseAssignments.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
-		body := ""
-		valid = true
-
-		for _, enrolled := range course.EnrollmentsConnection.Nodes {
-			if enrolled.Type == "TeacherEnrollment" {
-				body += p.Sprintf("[%s]("+viper.GetString("canvas.domain")+"/courses/"+course.ID+"/users/"+enrolled.User.ID+")\n", enrolled.User.Name)
+		assignmentsExist := false
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if (assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix()) || ((assignment.DueAt.Unix() - time.Now().AddDate(0, 0, 0).Unix()) > 57600) {
+				continue
 			}
+			if assignmentsExist == false {
+				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
+				valid, assignmentsExist = true, true
+			}
+			days := int(time.Until(assignment.DueAt).Hours() / 24)
+			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
+			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
+			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
+			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
+			body += p.Sprintf("**%d Days, ", days)
+			body += p.Sprintf("%d Hours, ", hours)
+			body += p.Sprintf("%d Minutes** 	|	", minutes)
+			body += p.Sprintf("%s\n\n", (assignment.DueAt.Format("02 Jan 2006 15:04")))
 		}
-		emb.AddField(course.CourseName, body)
 	}
 	if valid {
-		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
-	} else {
-		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
+		s.ChannelMessageSend(alertChannelID, "@here")
+		emb.SetDescription(body)
+		s.ChannelMessageSendEmbed(alertChannelID, emb.MessageEmbed)
 	}
 }
 
 func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	CourseAssignment := request.QueryAssignments(m.GuildID)
+	courseAssignments := api.GetStats(m.GuildID)
 	valid := false
 
 	emb := embed.NewEmbed()
@@ -167,7 +158,7 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
 	body := ""
 
-	for _, course := range CourseAssignment.Data.AllCourses {
+	for _, course := range courseAssignments.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
@@ -197,45 +188,82 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func DueAssignments(s *discordgo.Session) {
+func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	CourseAssignment := request.QueryAssignments(viper.GetString("discord.cs.id"))
+	cm, slug := extractCommand(m.Content)
+	log.Println(slug)
+	if cm == slug {
+		s.ChannelMessageSend(m.ChannelID, "> **Please enter a valid module code**")
+		return
+	}
+	slug = strings.ToUpper(strings.Split(slug, " ")[1])
+	courseAssignments := api.GetStats(m.GuildID)
+
+	valid := false
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle("Available Grade Statistics: " + slug)
+
+	body := "```\n"
+
+	for _, course := range courseAssignments.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil || course.CourseCode[len(course.CourseCode)-6:] != slug {
+			continue
+		}
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if assignment.ScoreStatistics.Max == 0 {
+				continue
+			}
+			valid = true
+
+			body += assignment.Name + fmt.Sprintf(" (%.0f Marks)", assignment.PointsPossible) + ":\n--------------------------------------\n"
+
+			body += "	" + fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)) + "	|	"
+			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"
+			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)) + "	"
+			body += "\n\n"
+		}
+	}
+	if valid {
+		body += "```"
+		emb.Description = body
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **No module data found**")
+	}
+}
+
+func CoordinatorInfo(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	courseAssignments := api.GetAssignments(m.GuildID)
 	valid := false
 
 	emb := embed.NewEmbed()
 
 	emb.SetColor(0xab0df9)
 
-	emb.SetTitle("Assignments Due Today")
+	emb.SetTitle("Module Coordinator Info")
+
 	p := message.NewPrinter(language.English)
-	body := ""
-	for _, course := range CourseAssignment.Data.AllCourses {
+	for _, course := range courseAssignments.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
-		assignmentsExist := false
-		for _, assignment := range course.AssignmentsConnection.Nodes {
-			if (assignment.DueAt.Unix() < time.Now().AddDate(0, 0, 0).Unix()) || ((assignment.DueAt.Unix() - time.Now().AddDate(0, 0, 0).Unix()) > 57600) {
-				continue
+		body := ""
+		valid = true
+
+		for _, enrolled := range course.EnrollmentsConnection.Nodes {
+			if enrolled.Type == "TeacherEnrollment" {
+				body += p.Sprintf("[%s]("+viper.GetString("canvas.domain")+"/courses/"+course.ID+"/users/"+enrolled.User.ID+")\n", enrolled.User.Name)
 			}
-			if assignmentsExist == false {
-				body += p.Sprintf("__**%s**__\n", course.CourseName[5:])
-				valid, assignmentsExist = true, true
-			}
-			days := int(time.Until(assignment.DueAt).Hours() / 24)
-			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
-			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
-			body += p.Sprintf("%.0f Marks\n", assignment.PointsPossible)
-			body += p.Sprintf("[%s](%s)\n", assignment.Name, assignment.HTMLURL)
-			body += p.Sprintf("**%d Days, ", days)
-			body += p.Sprintf("%d Hours, ", hours)
-			body += p.Sprintf("%d Minutes** 	|	", minutes)
-			body += p.Sprintf("%s\n\n", (assignment.DueAt.Format("02 Jan 2006 15:04")))
 		}
+		emb.AddField(course.CourseName, body)
 	}
 	if valid {
-		s.ChannelMessageSend(viper.GetString(("discord.cs.alert")), "<@&631495001573949450>")
-		emb.SetDescription(body)
-		s.ChannelMessageSendEmbed(viper.GetString(("discord.cs.alert")), emb.MessageEmbed)
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
 	}
 }
