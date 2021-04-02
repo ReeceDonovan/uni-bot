@@ -100,6 +100,5 @@ func GetStats(sID string) (parsedData *CourseAssignment) {
 			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
 		}
 	}
-	// canvasCache.Add(fmt.Sprintf("%s-Data", serverID), parsedData, cache.DefaultExpiration)
 	return parsedData
 }
