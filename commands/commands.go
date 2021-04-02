@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -102,7 +103,7 @@ func DueAssignments(s *discordgo.Session) {
 
 func dueAssignmentsHelper(s *discordgo.Session, serverID string, alertChannelID string) {
 
-	CourseAssignment := api.GetAssignments(serverID)
+	courseAssignments := api.GetAssignments(serverID)
 	valid := false
 
 	emb := embed.NewEmbed()
@@ -112,7 +113,7 @@ func dueAssignmentsHelper(s *discordgo.Session, serverID string, alertChannelID 
 	emb.SetTitle("Assignments Due Today")
 	p := message.NewPrinter(language.English)
 	body := ""
-	for _, course := range CourseAssignment.Data.AllCourses {
+	for _, course := range courseAssignments.Data.AllCourses {
 		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
 			continue
 		}
@@ -140,5 +141,49 @@ func dueAssignmentsHelper(s *discordgo.Session, serverID string, alertChannelID 
 		s.ChannelMessageSend(alertChannelID, "@here")
 		emb.SetDescription(body)
 		s.ChannelMessageSendEmbed(alertChannelID, emb.MessageEmbed)
+	}
+}
+
+func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	courseAssignments := api.GetStats(m.GuildID)
+	valid := false
+
+	emb := embed.NewEmbed()
+
+	emb.SetColor(0xab0df9)
+
+	emb.SetTitle(fmt.Sprintf("%d Module List", time.Now().Year()))
+
+	p := message.NewPrinter(language.English)
+	body := ""
+
+	for _, course := range courseAssignments.Data.AllCourses {
+		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
+			continue
+		}
+		valid = true
+		graded := false
+		for _, assignment := range course.AssignmentsConnection.Nodes {
+			if assignment.ScoreStatistics.Mean != 0 {
+				graded = true
+				break
+			}
+		}
+		body += p.Sprintf("**%s**\n", course.CourseName[5:])
+		body += p.Sprintf("[Canvas]("+viper.GetString("canvas.domain")+"/courses/%s) | ", course.ID)
+		body += p.Sprintf("[UCC](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | ", course.CourseCode[5:])
+		switch graded {
+		case true:
+			body += "Stats: ✓\n\n"
+		case false:
+			body += "Stats: ✗\n\n"
+		}
+	}
+	if valid {
+		emb.Description = body
+		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "> **Error getting module data**")
 	}
 }
