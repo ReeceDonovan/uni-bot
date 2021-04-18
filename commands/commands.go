@@ -230,7 +230,7 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"
 			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)) + "	"
 			body += "\n\n"
-			totalMax += assignment.ScoreStatistics.Max
+			totalMax += assignment.PointsPossible
 			totalMean += assignment.ScoreStatistics.Mean
 		}
 	}
