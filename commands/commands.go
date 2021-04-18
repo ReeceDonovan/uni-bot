@@ -190,6 +190,7 @@ func ModuleList(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	totalMax, totalMean := 0.0, 0.0
 	cm, slug := extractCommand(m.Content)
 	log.Println(slug)
 	if cm == slug {
@@ -217,18 +218,35 @@ func CourseStats(s *discordgo.Session, m *discordgo.MessageCreate) {
 				continue
 			}
 			valid = true
-
-			body += assignment.Name + fmt.Sprintf(" (%.0f Marks)", assignment.PointsPossible) + ":\n--------------------------------------\n"
+			assName := ""
+			if len(assignment.Name) >= 32 {
+				assName = assignment.Name[:32] + "..."
+			} else {
+				assName = assignment.Name
+			}
+			body += assName + fmt.Sprintf(" (%.0f Marks)", assignment.PointsPossible) + ":\n--------------------------------------\n"
 
 			body += "	" + fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Max)) + "	|	"
 			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Mean)) + "	|	"
 			body += fmt.Sprintf("%.2f", (assignment.ScoreStatistics.Min)) + "	"
 			body += "\n\n"
+			totalMax += assignment.ScoreStatistics.Max
+			totalMean += assignment.ScoreStatistics.Mean
 		}
 	}
 	if valid {
 		body += "```"
-		emb.Description = body
+
+		msg := "```\n"
+		msg += "Total Mark Average (so far):\n"
+		msg += "--------------------------------------\n"
+		msg += "	" + fmt.Sprintf("%.2f / %.2f", (totalMean), (totalMax)) + "	|	"
+		msg += fmt.Sprintf("%.2f", ((totalMean/totalMax)*(100/1))) + "%"
+		msg += "\n```\n"
+		msg += body
+
+		emb.Description = msg
+
 		s.ChannelMessageSendEmbed(m.ChannelID, emb.MessageEmbed)
 	} else {
 		s.ChannelMessageSend(m.ChannelID, "> **No module data found**")
