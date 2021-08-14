@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ReeceDonovan/uni-bot/commands"
 	"github.com/ReeceDonovan/uni-bot/config"
 	"github.com/ReeceDonovan/uni-bot/models"
 	"github.com/bwmarrin/discordgo"
@@ -22,6 +23,9 @@ func main() {
 	session, err := discordgo.New("Bot " + token)
 	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	exitError(err)
+
+	// Add handlers
+	commands.RegisterHandlers(session)
 
 	// Open websocket
 	err = session.Open()

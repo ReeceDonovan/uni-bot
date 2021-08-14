@@ -4,7 +4,7 @@ import "log"
 
 // Get user object
 func (user *User) Get() error {
-	log.Println("getting user data\n", user.UID)
+	log.Println("Getting user data\n", user.UID)
 	return db.First(user).Error
 }
 
