@@ -1,25 +1,15 @@
-version: "3.7"
+version: "3.8"
 services:
   discord-bot:
-    container_name: uni-bot-dev.local
-    # command: modd # Hot reloading
-    build: .
-    ports:
-      - 8888:80
-    ## Vars to put in override:
+    build:
+      context: ./
+      target: builder
+    image: uni-bot/discord-bot
+    env_file: ./.env
     environment:
-      - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - CANVAS_DOMAIN=${CANVAS_DOMAIN}
-      - SCHEDULER_TRIGGER=${SCHEDULER_TRIGGER}
+      - ENV=dev
     volumes:
-      - "./config:/config"
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: 500M
-        reservations:
-          cpus: "0.25"
-          memory: 200M
+      - ./:/go/src/app
+    command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+
+    # TODO: Backend database?

@@ -6,29 +6,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Active []ServerData
-
-// InitConfig loads env vars into viper
-func InitConfig() {
+func InitConfig() error {
+	// Viper
 	initDefaults()
+
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
-}
 
-func initServers() {
-	Active = ReadData()
-	viper.SetDefault("servers.active", Active)
+	return nil
 }
 
 func initDefaults() {
-	initServers()
 	// Discord
-	viper.SetDefault("discord.prefix", "!")
 	viper.SetDefault("discord.token", "DISCORD_TOKEN")
 
 	// Canvas
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
-
-	// Misc
-	viper.SetDefault("scheduler.trigger", "SCHEDULER_TRIGGER")
 }
