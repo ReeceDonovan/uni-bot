@@ -1,15 +1,35 @@
 version: "3.8"
 services:
-  discord-bot:
+  postgres-bot:
+    image: "postgres:alpine"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - "pgdata_bot:/var/lib/postgresql/data"
+    command:
+      [
+        "postgres",
+        "-c",
+        "log_statement=mod",
+        "-c",
+        "log_min_error_statement=ERROR",
+      ]
+  uni-bot:
     build:
       context: ./
       target: builder
-    image: uni-bot/discord-bot
+    image: uni-bot
     env_file: ./.env
     environment:
       - ENV=dev
     volumes:
       - ./:/go/src/app
+    depends_on:
+      - postgres-bot
     command: reflex -r "\.go$$" -s -- sh -c "go run ./"
-
-    # TODO: Backend database?
+volumes:
+  pgdata_bot:

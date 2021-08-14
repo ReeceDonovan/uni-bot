@@ -22,4 +22,11 @@ func initDefaults() {
 
 	// Canvas
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
+
+	// Database
+	viper.SetDefault("db.user", "")
+	viper.SetDefault("db.pass", "")
+	viper.SetDefault("db.host", "")
+	viper.SetDefault("db.port", "")
+	viper.SetDefault("db.name", "")
 }

@@ -7,12 +7,15 @@ import (
 	"syscall"
 
 	"github.com/ReeceDonovan/uni-bot/config"
+	"github.com/ReeceDonovan/uni-bot/models"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
 )
 
 func main() {
 	exitError(config.InitConfig())
+
+	models.InitModels()
 
 	// Discord connection
 	token := viper.GetString("discord.token")
