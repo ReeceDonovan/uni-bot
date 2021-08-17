@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ReeceDonovan/uni-bot/commands"
 	"github.com/ReeceDonovan/uni-bot/config"
+	"github.com/ReeceDonovan/uni-bot/handlers"
 	"github.com/ReeceDonovan/uni-bot/models"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
@@ -25,7 +25,7 @@ func main() {
 	exitError(err)
 
 	// Add handlers
-	commands.RegisterHandlers(session)
+	handlers.RegisterHandlers(session)
 
 	// Open websocket
 	err = session.Open()
