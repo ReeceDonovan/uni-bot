@@ -19,6 +19,8 @@ func InitConfig() error {
 func initDefaults() {
 	// Discord
 	viper.SetDefault("discord.token", "DISCORD_TOKEN")
+	viper.SetDefault("discord.app", "DISCORD_APP")
+	viper.SetDefault("discord.guild", "")
 
 	// Canvas
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")

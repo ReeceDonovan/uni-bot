@@ -15,7 +15,6 @@ import (
 )
 
 func modules(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
 	discordUser, err := middleware.ValidateScope(s, i)
 	if err != nil {
 		ErrorHandler(s, i, err)
@@ -25,8 +24,10 @@ func modules(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	var courses *models.Courses
 
-	if scope == "server" {
+	var response *discordgo.InteractionResponse
 
+	switch scope {
+	case "server":
 		server := &models.Server{
 			SID: i.GuildID,
 		}
@@ -40,10 +41,13 @@ func modules(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 		courses = api.GetCourses(server.CanvasToken)
 
-		log.Println(courses)
-
-	} else {
-
+		response = &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{createModuleList(discordUser, courses)},
+			},
+		}
+	case "user":
 		user := &models.User{
 			UID: discordUser.ID,
 		}
@@ -57,15 +61,30 @@ func modules(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 		courses = api.GetCourses(user.CanvasToken)
 
-		log.Println(courses)
+		response = &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Flags:  1 << 6,
+				Embeds: []*discordgo.MessageEmbed{createModuleList(discordUser, courses)},
+			},
+		}
 
 	}
 
+	err = s.InteractionRespond(i.Interaction, response)
+	if err != nil {
+		log.Printf("Error responding data: %v", err)
+		ErrorHandler(s, i, errors.New("error occurred"))
+		return
+	}
+}
+
+func createModuleList(discordUser *discordgo.User, courses *models.Courses) *discordgo.MessageEmbed {
 	courseFields := []*discordgo.MessageEmbedField{}
 	for _, course := range *courses {
 		courseFields = append(courseFields, &discordgo.MessageEmbedField{
 			Name:   course.Name,
-			Value:  fmt.Sprintf(" | [Canvas]("+viper.GetString("canvas.domain")+"/courses/%s) | [UCC](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | ", course.ID, course.CourseCode[5:]),
+			Value:  fmt.Sprintf(" | [Canvas](%s/courses/%d) | [UCC](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | ", viper.GetString("canvas.domain"), course.ID, course.CourseCode[5:]),
 			Inline: false,
 		})
 	}
@@ -80,13 +99,7 @@ func modules(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			URL: discordUser.AvatarURL("2048"),
 		},
 		Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-		Title:     "2021 Module List",
+		Title:     fmt.Sprintf("%d Module List", time.Now().Year()),
 	}
-
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	})
+	return embed
 }
