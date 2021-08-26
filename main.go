@@ -30,8 +30,6 @@ func main() {
 	// Open websocket
 	err = session.Open()
 
-	// TODO: commands.Register(session)
-
 	exitError(err)
 
 	defer session.Close()
@@ -42,7 +40,7 @@ func main() {
 	<-sc
 	log.Println("Exiting")
 
-	// TODO: Cleanup commands on shutdown
+	// TODO: Cleanup commands on shutdown?
 }
 
 func exitError(err error) {

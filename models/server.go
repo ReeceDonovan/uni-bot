@@ -4,13 +4,13 @@ import "log"
 
 // Get server object
 func (server *Server) Get() error {
-	log.Println("Getting server data\n", server.SID)
+	log.Println("Getting server data: ", server.SID)
 	return db.First(server).Error
 }
 
 // Create server object
 func (server *Server) Create() error {
-	log.Println("Creating server link\n", server)
+	log.Println("Creating server link: ", server)
 	return db.Create(server).Error
 }
 

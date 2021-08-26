@@ -14,7 +14,6 @@ import (
 )
 
 func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
 	discordUser, err := middleware.ValidateScope(s, i)
 	if err != nil {
 		ErrorHandler(s, i, err)
@@ -95,7 +94,6 @@ func statsComponent(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	default:
 		moduleID := data.Values[0][2:]
 		var token string
-		log.Println(data.Values)
 		if data.Values[0][0:1] == "u" {
 
 			user := &models.User{
@@ -147,7 +145,6 @@ func statsComponent(s *discordgo.Session, i *discordgo.InteractionCreate) {
 }
 
 func createModuleStatsList(scope string, token string) *[]discordgo.MessageComponent {
-
 	courses := api.GetCourses(token)
 
 	var moduleOptions []discordgo.SelectMenuOption
@@ -186,7 +183,6 @@ func createModuleStatsList(scope string, token string) *[]discordgo.MessageCompo
 }
 
 func createModuleStatsEmbed(moduleID string, token string) []*discordgo.MessageEmbed {
-
 	assignments := api.GetAssignments(moduleID, token)
 
 	course := api.GetCourse(moduleID, token)
@@ -263,6 +259,5 @@ func createModuleStatsEmbed(moduleID string, token string) []*discordgo.MessageE
 		},
 	}
 	ret = append(ret, embs...)
-
 	return ret
 }

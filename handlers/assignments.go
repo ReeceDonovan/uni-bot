@@ -11,7 +11,6 @@ import (
 )
 
 func assignments(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
 	discordUser, err := middleware.ValidateScope(s, i)
 	if err != nil {
 		ErrorHandler(s, i, err)

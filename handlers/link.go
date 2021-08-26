@@ -12,7 +12,6 @@ import (
 )
 
 func link(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
 	discordUser, err := middleware.ValidateScope(s, i)
 	if err != nil {
 		ErrorHandler(s, i, err)
@@ -30,7 +29,6 @@ func link(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	if scope == "server" {
-
 		server := &models.Server{
 			SID: i.GuildID,
 		}
@@ -56,9 +54,7 @@ func link(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			ErrorHandler(s, i, errors.New("error creating server link, please contact: <@342150581554774018> | Nõ̷̋t̴̏͆ĥ̵̆i̴̓̌c̵͌̎#9999"))
 			return
 		}
-
 	} else {
-
 		user := &models.User{
 			UID: discordUser.ID,
 		}
@@ -107,7 +103,5 @@ func link(s *discordgo.Session, i *discordgo.InteractionCreate) {
 				`<@%s> has just linked this server, you can link your personal token using the /link command for personalised canvas data`, discordUser.ID,
 			),
 		})
-
 	}
-
 }

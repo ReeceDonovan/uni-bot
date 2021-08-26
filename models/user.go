@@ -4,13 +4,13 @@ import "log"
 
 // Get user object
 func (user *User) Get() error {
-	log.Println("Getting user data\n", user.UID)
+	log.Println("Getting user data: ", user.UID)
 	return db.First(user).Error
 }
 
 // Create user object
 func (user *User) Create() error {
-	log.Println("Creating user link\n", user)
+	log.Println("Creating user link: ", user)
 	return db.Create(user).Error
 }
 

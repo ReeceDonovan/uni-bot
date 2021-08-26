@@ -21,6 +21,5 @@ func ValidateScope(s *discordgo.Session, i *discordgo.InteractionCreate) (*disco
 	} else {
 		return nil, errors.New("error creating user link: User data nil")
 	}
-
 	return discordUser, nil
 }
