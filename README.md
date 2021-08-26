@@ -2,23 +2,17 @@
 
 ## What?
 
-This is a discord bot built for my computer science class's discord server.
-
-## How?
-
-Using the discordGo package/wrapper for the Discord bot API and deploying using Docker
+This is a discord bot built to help students keep track and ontop of their college assignments and grades through the use of the discord bot API and the canvas online learning API.
 
 ## Features?
 
-**Current**
-
-**!help** command that returns all available bot commands.
-<br>**!assignment** command that you can run on the CS 2nd year server or by direct messaging the bot, this will return a formatted list of our courses active assignments.
-<br>**!stats <code\>** command that returns assignment grading stats for the specified module.
-<br>**!contact** command that returns the canvas user pages of course lecturers and coordinators.
+**/link** Allows a user or server owner to link a canvas access to their user or server ID.
+<br>**/assignments** Returns a formatted list of currently active assignments.
 
 ![Assignment Message](https://i.gyazo.com/d2ee4267888c6e52c88bd1dae6405ce8.png)
+<br>**/stats** Returns a drop down menu of modules with grading stats availible, selecting from the list will return a formatted breakdown of the modules assignment grades.
 
-**Future**
+![Stats Message](https://i.gyazo.com/522a3c5ff605b95f3084ae53539da181.png)
+<br>**/modules** command that returns a list of the users modules with useful quick-links.
 
-Hopefully getting to implement features that allows use of the bot by any student and on any discord server, providing users of any course with personalized individual assignment information and features.
+![Modules Message](https://i.gyazo.com/c4047f94cd39070ab170af55d2cdb989.png)
