@@ -5,41 +5,34 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"github.com/ReeceDonovan/uni-bot/commands"
 	"github.com/ReeceDonovan/uni-bot/config"
+	"github.com/ReeceDonovan/uni-bot/handlers"
+	"github.com/ReeceDonovan/uni-bot/models"
 	"github.com/bwmarrin/discordgo"
-	"github.com/go-co-op/gocron"
 	"github.com/spf13/viper"
 )
 
 func main() {
-	config.InitConfig()
+	exitError(config.InitConfig())
+
+	models.InitModels()
 
 	// Discord connection
 	token := viper.GetString("discord.token")
 	session, err := discordgo.New("Bot " + token)
-
 	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
-	if err != nil {
-		log.Println("Failed to initialise bot")
-	}
+	exitError(err)
 
+	// Add handlers
+	handlers.RegisterHandlers(session)
+
+	// Open websocket
 	err = session.Open()
-	if err != nil {
-		log.Println("Failed to connect bot")
-		os.Exit(1)
-	}
 
-	commands.RegisterCommands(session)
+	exitError(err)
 
-	// Scheduling
-	scheduler := gocron.NewScheduler(time.UTC)
-	scheduler.StartAsync()
-	schedulerTrigger := viper.GetString("scheduler.trigger")
-	log.Println("Scheduling Due Assignments Check for " + schedulerTrigger)
-	scheduler.Every(1).Day().At(schedulerTrigger).Do(commands.DueAssignments, session)
+	defer session.Close()
 
 	log.Println("Bot is Running")
 	sc := make(chan os.Signal, 1)
@@ -47,5 +40,11 @@ func main() {
 	<-sc
 	log.Println("Exiting")
 
-	session.Close()
+	// TODO: Cleanup commands on shutdown?
+}
+
+func exitError(err error) {
+	if err != nil {
+		log.Fatalf("Failed to start bot: %v", err)
+	}
 }

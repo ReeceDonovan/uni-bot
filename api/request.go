@@ -9,12 +9,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ReeceDonovan/uni-bot/config"
+	"github.com/ReeceDonovan/uni-bot/models"
 	"github.com/spf13/viper"
 )
 
 func Req(method, slug, token string, body []byte) (int, []byte) {
-
 	r, err := http.NewRequest(method,
 		fmt.Sprintf("%s/%s", viper.GetString("canvas.domain"), slug),
 		bytes.NewReader(body),
@@ -46,59 +45,35 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 		return 0, []byte{}
 
 	}
-
 	return resp.StatusCode, bd
 }
 
-func GetAssignments(sID string) (parsedData *CourseAssignment) {
-	var token string
+func GetCourses(token string) (courses *models.Courses) {
+	_, res := Req("GET", "/api/v1/users/self/courses?enrollment_state=active&enrollment_type=student&include[]=total_scores&include[]=current_grading_period_scores&include[]=total_students&include[]=teachers&include[]=term", token, nil)
 
-	sr := viper.Get("servers.active").([]config.ServerData)
-	for _, s := range sr {
-		if sID == s.ServerID {
-			token = s.CanvasToken
-		}
-	}
-	_, res := Req("POST", "/api/graphql", token, AssignmentQuery)
-	jsonErr := json.Unmarshal(res, &parsedData)
+	jsonErr := json.Unmarshal(res, &courses)
 	if jsonErr != nil {
 		log.Println("Error parsing response: ", jsonErr)
 	}
-	return parsedData
+	return courses
 }
 
-func GetStats(sID string) (parsedData *CourseAssignment) {
-	var token string
+func GetCourse(moduleID string, token string) (course *models.Course) {
+	_, res := Req("GET", "/api/v1/courses/"+moduleID+"?include[]=total_scores&include[]=current_grading_period_scores&include[]=total_students&include[]=teachers", token, nil)
 
-	sr := viper.Get("servers.active").([]config.ServerData)
-	for _, s := range sr {
-		if sID == s.ServerID {
-			token = s.CanvasToken
-		}
-	}
-	_, res := Req("POST", "/api/graphql", token, AssignmentQuery)
-	jsonErr := json.Unmarshal(res, &parsedData)
+	jsonErr := json.Unmarshal(res, &course)
 	if jsonErr != nil {
 		log.Println("Error parsing response: ", jsonErr)
 	}
-	for _, course := range parsedData.Data.AllCourses {
-		if (len(course.Term.Name) > 8) || course.EnrollmentsConnection.Nodes == nil {
-			continue
-		}
-		_, res := Req("GET", "/api/v1/courses/"+course.ID+"/assignments?include[]=submission&include[]=score_statistics", token, nil)
+	return course
+}
 
-		assStat := ScoreRaw{}
+func GetAssignments(moduleID string, token string) (assignments *models.Assignments) {
+	_, res := Req("GET", fmt.Sprintf("/api/v1/users/self/courses/%s/assignments?include[]=all_dates&include[]=submission&include[]=score_statistics&order_by=due_at", moduleID), token, nil)
 
-		jsonErr := json.Unmarshal(res, &assStat)
-		if jsonErr != nil {
-			log.Println("Error parsing response\n", jsonErr)
-		}
-
-		for x, _ := range course.AssignmentsConnection.Nodes {
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Min = assStat[x].ScoreStatistics.Min
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Mean = assStat[x].ScoreStatistics.Mean
-			course.AssignmentsConnection.Nodes[x].ScoreStatistics.Max = assStat[x].ScoreStatistics.Max
-		}
+	jsonErr := json.Unmarshal(res, &assignments)
+	if jsonErr != nil {
+		log.Println("Error parsing response: ", jsonErr)
 	}
-	return parsedData
+	return assignments
 }

@@ -1,25 +1,35 @@
-version: "3.7"
+version: "3.8"
 services:
-  discord-bot:
-    container_name: uni-bot-dev.local
-    # command: modd # Hot reloading
-    build: .
+  postgres-bot:
+    image: "postgres:alpine"
     ports:
-      - 8888:80
-    ## Vars to put in override:
+      - "5432:5432"
     environment:
-      - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - CANVAS_DOMAIN=${CANVAS_DOMAIN}
-      - SCHEDULER_TRIGGER=${SCHEDULER_TRIGGER}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
-      - "./config:/config"
-      - "/etc/timezone:/etc/timezone:ro"
-      - "/etc/localtime:/etc/localtime:ro"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: 500M
-        reservations:
-          cpus: "0.25"
-          memory: 200M
+      - "pgdata_bot:/var/lib/postgresql/data"
+    command:
+      [
+        "postgres",
+        "-c",
+        "log_statement=mod",
+        "-c",
+        "log_min_error_statement=ERROR",
+      ]
+  uni-bot:
+    build:
+      context: ./
+      target: builder
+    image: uni-bot
+    env_file: ./.env
+    environment:
+      - ENV=dev
+    volumes:
+      - ./:/go/src/app
+    depends_on:
+      - postgres-bot
+    command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+volumes:
+  pgdata_bot:
