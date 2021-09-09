@@ -21,6 +21,16 @@ services:
   uni-bot:
     build: .
     image: "ghcr.io/reecedonovan/uni-bot:latest"
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_APP: ${DISCORD_APP}
+      DISCORD_GUILD: ${DISCORD_GUILD}
+      CANVAS_DOMAIN: ${CANVAS_DOMAIN}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
     volumes:
       - ./:/go/src/app
     depends_on:
