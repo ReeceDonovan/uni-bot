@@ -29,11 +29,22 @@ func link(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 
 	if scope == "server" {
+		permCheck, err := linkPermissionCheck(s, i.GuildID, discordUser.ID)
+		if err != nil {
+			log.Printf("Error creating server link: %v", err)
+			ErrorHandler(s, i, errors.New("error creating server link, please contact: <@342150581554774018> | Nõ̷̋t̴̏͆ĥ̵̆i̴̓̌c̵͌̎#9999"))
+			return
+		} else if !permCheck {
+			log.Printf("Error creating server link: User does not have valid permissions")
+			ErrorHandler(s, i, errors.New("error creating server link, user does not have admin level permissions"))
+			return
+		}
+
 		server := &models.Server{
 			SID: i.GuildID,
 		}
 
-		err := server.Get()
+		err = server.Get()
 		if err == nil {
 			ErrorHandler(s, i, errors.New("this server has already been linked, please contact: <@342150581554774018> | Nõ̷̋t̴̏͆ĥ̵̆i̴̓̌c̵͌̎#9999"))
 			return
@@ -104,4 +115,27 @@ func link(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			),
 		})
 	}
+}
+
+func linkPermissionCheck(s *discordgo.Session, guildID string, userID string) (bool, error) {
+	member, err := s.State.Member(guildID, userID)
+	if err != nil {
+		if member, err = s.GuildMember(guildID, userID); err != nil {
+			return false, err
+		}
+	}
+	guild, err := s.State.Guild(guildID)
+	if err != nil {
+		return false, err
+	}
+	for _, roleID := range member.Roles {
+		role, err := s.State.Role(guildID, roleID)
+		if err != nil {
+			return false, err
+		}
+		if role.Permissions&discordgo.PermissionAdministrator == discordgo.PermissionAdministrator {
+			return true, nil
+		}
+	}
+	return (member.Permissions&discordgo.PermissionAdministrator != 0 || member.User.ID == guild.OwnerID), nil
 }

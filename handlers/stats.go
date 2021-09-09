@@ -24,7 +24,6 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	switch i.ApplicationCommandData().Options[0].StringValue() {
 	case "user":
-
 		user := &models.User{
 			UID: discordUser.ID,
 		}
@@ -46,7 +45,6 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		}
 
 	case "server":
-
 		server := &models.Server{
 			SID: i.GuildID,
 		}
@@ -65,7 +63,6 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 				Components: *createModuleStatsList("s", server.CanvasToken),
 			},
 		}
-
 	}
 	err = s.InteractionRespond(i.Interaction, response)
 	if err != nil {
@@ -192,7 +189,6 @@ func createModuleStatsEmbed(moduleID string, token string) []*discordgo.MessageE
 	var embs []*discordgo.MessageEmbed
 
 	for _, assignment := range *assignments {
-
 		var fields []*discordgo.MessageEmbedField
 		if assignment.ScoreStatistics != nil {
 			totalPossible += assignment.PointsPossible

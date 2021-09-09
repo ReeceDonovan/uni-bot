@@ -147,7 +147,6 @@ func RegisterHandlers(s *discordgo.Session) {
 }
 
 func ErrorHandler(s *discordgo.Session, i *discordgo.InteractionCreate, err error) {
-	log.Println(err.Error())
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
