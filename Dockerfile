@@ -1,10 +1,10 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.17-alpine AS dev
 
-WORKDIR /go/src/app
+WORKDIR /app
 
-ENV GO111MODULE=on
+RUN apk add git
 
-RUN go get github.com/cespare/reflex
+RUN GO111MODULE=on go get github.com/cortesi/modd/cmd/modd
 
 COPY go.mod .
 COPY go.sum .
@@ -13,12 +13,14 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o ./run .
+RUN go install github.com/ReeceDonovan/uni-bot
+
+CMD [ "go", "run", "*.go" ]
 
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
 
-COPY --from=builder /go/src/app/run .
+WORKDIR /bin
 
-CMD ["./run"]
+COPY --from=dev /go/bin/uni-bot ./uni-bot
+
+CMD ["sh", "-c", "uni-bot -p"]

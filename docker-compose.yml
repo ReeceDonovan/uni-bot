@@ -19,17 +19,11 @@ services:
         "log_min_error_statement=ERROR",
       ]
   uni-bot:
-    build:
-      context: ./
-      target: builder
-    image: uni-bot
-    env_file: ./.env
-    environment:
-      - ENV=dev
+    build: .
+    image: "ghcr.io/reecedonovan/uni-bot:latest"
     volumes:
       - ./:/go/src/app
     depends_on:
       - postgres-bot
-    command: reflex -r "\.go$$" -s -- sh -c "go run ./"
 volumes:
   pgdata_bot:
