@@ -62,7 +62,7 @@ jobs:
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: |
+          run: |
             cd /root/uni-bot
             git pull
             docker-compose pull
