@@ -71,8 +71,7 @@ jobs:
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASS }}
           port: ${{ secrets.PORT }}
-          with:
-            envs: DISCORD_TOKEN, DISCORD_APP, DISCORD_GUILD, CANVAS_DOMAIN, DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
+          envs: DISCORD_TOKEN, DISCORD_APP, DISCORD_GUILD, CANVAS_DOMAIN, DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
           script: |
             cd /root/'uni-bot'
             git pull
