@@ -49,3 +49,29 @@ jobs:
           push: true
           context: .
           tags: ghcr.io/reecedonovan/uni-bot:latest, ghcr.io/reecedonovan/uni-bot:${{ github.sha }}
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Netsoc Cloud via SSH Action
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /root/uni-bot
+            git pull
+            docker-compose pull
+            export DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            export DISCORD_APP=${{ secrets.DISCORD_APP }}
+            export DISCORD_GUILD=${{ secrets.DISCORD_GUILD }}
+            export CANVAS_DOMAIN=${{ secrets.CANVAS_DOMAIN }}
+            export DB_HOST=${{ secrets.DB_HOST }}
+            export DB_PORT=${{ secrets.DB_PORT }}
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASS=${{ secrets.DB_PASS }}
+            export DB_NAME=${{ secrets.DB_NAME }}
+            docker-compose up -d
