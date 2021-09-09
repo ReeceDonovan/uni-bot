@@ -76,13 +76,4 @@ jobs:
             cd /root/'uni-bot'
             git pull
             docker-compose pull
-            export DISCORD_TOKEN=$DISCORD_TOKEN 
-            export DISCORD_APP=$DISCORD_APP 
-            export DISCORD_GUILD=$DISCORD_GUILD 
-            export CANVAS_DOMAIN=$CANVAS_DOMAIN 
-            export DB_HOST=$DB_HOST 
-            export DB_PORT=$DB_PORT 
-            export DB_USER=$DB_USER 
-            export DB_PASS=$DB_PASS 
-            export DB_NAME=$DB_NAME 
             docker-compose up -d
