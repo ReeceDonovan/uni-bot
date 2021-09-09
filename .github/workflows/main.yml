@@ -68,10 +68,9 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASS }}
           port: ${{ secrets.PORT }}
-          envs: DISCORD_TOKEN, DISCORD_APP, DISCORD_GUILD, CANVAS_DOMAIN, DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
           script: |
             cd /root/'uni-bot'
             git pull
@@ -86,3 +85,5 @@ jobs:
             export DB_PASS=$DB_PASS 
             export DB_NAME=$DB_NAME 
             docker-compose up -d
+            with: 
+              envs: DISCORD_TOKEN, DISCORD_APP, DISCORD_GUILD, CANVAS_DOMAIN, DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
