@@ -51,6 +51,7 @@ jobs:
           tags: ghcr.io/reecedonovan/uni-bot:latest, ghcr.io/reecedonovan/uni-bot:${{ github.sha }}
 
   deploy:
+    environment: deploy
     needs: [build]
     runs-on: ubuntu-latest
     steps:
