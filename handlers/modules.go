@@ -90,13 +90,10 @@ func createModuleList(discordUser *discordgo.User, courses *models.Courses) *dis
 	}
 
 	embed := &discordgo.MessageEmbed{
-		Author: &discordgo.MessageEmbedAuthor{
-			Name: discordUser.Username,
-		},
 		Color:  0xab0df9, // Purple
 		Fields: courseFields,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: discordUser.AvatarURL("2048"),
+			URL: "https://w7.pngwing.com/pngs/883/509/png-transparent-iphone-learning-management-system-canvas-lms-canvas-electronics-canvas-mobile-phones-thumbnail.png",
 		},
 		Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
 		Title:     viper.GetString("canvas.term")[2:] + " Module List",
