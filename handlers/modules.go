@@ -99,7 +99,7 @@ func createModuleList(discordUser *discordgo.User, courses *models.Courses) *dis
 			URL: discordUser.AvatarURL("2048"),
 		},
 		Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-		Title:     fmt.Sprintf("%d Module List", time.Now().Year()),
+		Title:     viper.GetString("canvas.term")[2:] + " Module List",
 	}
 	return embed
 }
