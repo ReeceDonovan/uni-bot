@@ -27,6 +27,7 @@ type Course struct {
 	FriendlyName                     interface{}   `json:"friendly_name"`
 	Term                             Term          `json:"term"`
 	ApplyAssignmentGroupWeights      bool          `json:"apply_assignment_group_weights"`
+	TotalStudents                    int64         `json:"total_students"`
 	Teachers                         []Teacher     `json:"teachers"`
 	Calendar                         Calendar      `json:"calendar"`
 	TimeZone                         TimeZone      `json:"time_zone"`
