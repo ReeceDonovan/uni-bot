@@ -24,6 +24,7 @@ func initDefaults() {
 
 	// Canvas
 	viper.SetDefault("canvas.domain", "CANVAS_DOMAIN")
+	viper.SetDefault("canvas.term", "CANVAS_TERM")
 
 	// Database
 	viper.SetDefault("db.user", "")

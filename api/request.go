@@ -48,14 +48,20 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 	return resp.StatusCode, bd
 }
 
-func GetCourses(token string) (courses *models.Courses) {
-	_, res := Req("GET", "/api/v1/users/self/courses?enrollment_state=active&enrollment_type=student&include[]=total_scores&include[]=current_grading_period_scores&include[]=total_students&include[]=teachers&include[]=term", token, nil)
-
-	jsonErr := json.Unmarshal(res, &courses)
+func GetCourses(token string) *models.Courses {
+	_, res := Req("GET", "/api/v1/users/self/courses?enrollment_state=active&enrollment_type=student&include[]=total_scores&include[]=current_grading_period_scores&include[]=total_students&include[]=teachers&include[]=term&per_page=1000", token, nil)
+	tempCourses := &models.Courses{}
+	jsonErr := json.Unmarshal(res, &tempCourses)
 	if jsonErr != nil {
 		log.Println("Error parsing response: ", jsonErr)
 	}
-	return courses
+	termCourses := models.Courses{}
+	for _, course := range *tempCourses {
+		if course.Term.Name == viper.GetString("canvas.term") {
+			termCourses = append(termCourses, course)
+		}
+	}
+	return &termCourses
 }
 
 func GetCourse(moduleID string, token string) (course *models.Course) {
@@ -69,7 +75,7 @@ func GetCourse(moduleID string, token string) (course *models.Course) {
 }
 
 func GetAssignments(moduleID string, token string) (assignments *models.Assignments) {
-	_, res := Req("GET", fmt.Sprintf("/api/v1/users/self/courses/%s/assignments?include[]=all_dates&include[]=submission&include[]=score_statistics&order_by=due_at", moduleID), token, nil)
+	_, res := Req("GET", fmt.Sprintf("/api/v1/users/self/courses/%s/assignments?include[]=all_dates&include[]=submission&include[]=score_statistics&order_by=due_at&per_page=1000", moduleID), token, nil)
 
 	jsonErr := json.Unmarshal(res, &assignments)
 	if jsonErr != nil {

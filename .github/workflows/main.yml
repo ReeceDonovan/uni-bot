@@ -69,6 +69,7 @@ jobs:
             export DISCORD_APP=${{ secrets.DISCORD_APP }}
             export DISCORD_GUILD=${{ secrets.DISCORD_GUILD }}
             export CANVAS_DOMAIN=${{ secrets.CANVAS_DOMAIN }}
+            export CANVAS_TERM="AY21/22"
             export DB_HOST=${{ secrets.DB_HOST }}
             export DB_PORT=${{ secrets.DB_PORT }}
             export DB_USER=${{ secrets.DB_USER }}
