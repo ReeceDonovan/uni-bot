@@ -83,7 +83,7 @@ func createModuleList(discordUser *discordgo.User, courses *models.Courses) *dis
 	courseFields := []*discordgo.MessageEmbedField{}
 	for _, course := range *courses {
 		courseFields = append(courseFields, &discordgo.MessageEmbedField{
-			Name:   course.Name,
+			Name:   course.Name[5:],
 			Value:  fmt.Sprintf(" | [Canvas](%s/courses/%d) | [UCC](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | Enrolled: %d", viper.GetString("canvas.domain"), course.ID, course.CourseCode[5:], course.TotalStudents),
 			Inline: false,
 		})
