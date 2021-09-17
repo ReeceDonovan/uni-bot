@@ -156,16 +156,7 @@ func createModuleStatsList(scope string, token string) *[]discordgo.MessageCompo
 				Description: module.Name[12:],
 			})
 		}
-
 	}
-	if moduleCount == 0 {
-		moduleOptions = append(moduleOptions, discordgo.SelectMenuOption{
-			Label:       "No stats available",
-			Value:       "null",
-			Description: "No stats available",
-		})
-	}
-
 	return &[]discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{

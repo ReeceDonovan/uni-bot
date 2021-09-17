@@ -82,6 +82,9 @@ func modules(s *discordgo.Session, i *discordgo.InteractionCreate) {
 func createModuleList(discordUser *discordgo.User, courses *models.Courses) *discordgo.MessageEmbed {
 	courseFields := []*discordgo.MessageEmbedField{}
 	for _, course := range *courses {
+		if course.Term.Name != viper.GetString("canvas.term") {
+			continue
+		}
 		courseFields = append(courseFields, &discordgo.MessageEmbedField{
 			Name:   course.Name[5:],
 			Value:  fmt.Sprintf(" | [Canvas](%s/courses/%d) | [UCC](https://www.ucc.ie/admin/registrar/modules/?mod=%s) | Enrolled: %d", viper.GetString("canvas.domain"), course.ID, course.CourseCode[5:], course.TotalStudents),

@@ -49,19 +49,19 @@ func Req(method, slug, token string, body []byte) (int, []byte) {
 }
 
 func GetCourses(token string) *models.Courses {
-	_, res := Req("GET", "/api/v1/users/self/courses?enrollment_state=active&enrollment_type=student&include[]=total_scores&include[]=current_grading_period_scores&include[]=total_students&include[]=teachers&include[]=term&per_page=1000", token, nil)
+	_, res := Req("GET", "/api/v1/users/self/courses?enrollment_type=student&include[]=total_scores&include[]=current_grading_period_scores&include[]=total_students&include[]=teachers&include[]=term&per_page=1000", token, nil)
 	tempCourses := &models.Courses{}
 	jsonErr := json.Unmarshal(res, &tempCourses)
 	if jsonErr != nil {
 		log.Println("Error parsing response: ", jsonErr)
 	}
-	termCourses := models.Courses{}
+	courses := models.Courses{}
 	for _, course := range *tempCourses {
-		if course.Term.Name == viper.GetString("canvas.term") {
-			termCourses = append(termCourses, course)
+		if course.AccountID == 1 {
+			courses = append(courses, course)
 		}
 	}
-	return &termCourses
+	return &courses
 }
 
 func GetCourse(moduleID string, token string) (course *models.Course) {
