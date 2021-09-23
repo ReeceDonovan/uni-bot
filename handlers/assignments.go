@@ -69,6 +69,7 @@ func assignments(s *discordgo.Session, i *discordgo.InteractionCreate) {
 				Flags:  1 << 6,
 			},
 		}
+
 	}
 
 	err = s.InteractionRespond(i.Interaction, response)
@@ -95,11 +96,8 @@ func createAssignmentList(discordUser *discordgo.User, courses *models.Courses, 
 				continue
 			}
 			valid = true
-			days := int(time.Until(assignment.DueAt).Hours() / 24)
-			hours := int(time.Until(assignment.DueAt).Hours() - float64(int(days*24)))
-			minutes := int(time.Until(assignment.DueAt).Minutes() - float64(int(days*24*60)+int(hours*60)))
 			marks := fmt.Sprintf("%.0f Marks | ", assignment.PointsPossible)
-			countdown := fmt.Sprintf("[%d Days, %d Hours, %d Minutes](%s)\n<t:%d:F>\n\n", days, hours, minutes, assignment.HTMLURL, assignment.DueAt.Unix())
+			countdown := fmt.Sprintf("<t:%d:R>\n[%s](%s)\n\n", assignment.DueAt.Unix(), assignment.DueAt.Format("02 Jan 2006 15:04"), assignment.HTMLURL)
 			fields := &discordgo.MessageEmbedField{
 				Name:   marks + assignment.Name,
 				Value:  countdown,
