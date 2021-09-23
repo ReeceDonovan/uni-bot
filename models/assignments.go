@@ -1,10 +1,12 @@
 package models
 
+import "time"
+
 type Assignments []AssignmentElement
 
 type AssignmentElement struct {
 	ID                              int64            `json:"id"`
-	DueAt                           string           `json:"due_at"`
+	DueAt                           time.Time        `json:"due_at"`
 	UnlockAt                        *string          `json:"unlock_at"`
 	LockAt                          string           `json:"lock_at"`
 	PointsPossible                  float64          `json:"points_possible"`
@@ -66,14 +68,14 @@ type AssignmentElement struct {
 }
 
 type AllDate struct {
-	DueAt    string  `json:"due_at"`
-	UnlockAt *string `json:"unlock_at"`
-	LockAt   string  `json:"lock_at"`
-	Base     *bool   `json:"base,omitempty"`
-	ID       *int64  `json:"id,omitempty"`
-	Title    *string `json:"title,omitempty"`
-	SetType  *string `json:"set_type,omitempty"`
-	SetID    *int64  `json:"set_id,omitempty"`
+	DueAt    time.Time `json:"due_at"`
+	UnlockAt *string   `json:"unlock_at"`
+	LockAt   string    `json:"lock_at"`
+	Base     *bool     `json:"base,omitempty"`
+	ID       *int64    `json:"id,omitempty"`
+	Title    *string   `json:"title,omitempty"`
+	SetType  *string   `json:"set_type,omitempty"`
+	SetID    *int64    `json:"set_id,omitempty"`
 }
 
 type LockInfo struct {
