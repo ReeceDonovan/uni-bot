@@ -66,7 +66,7 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 	err = s.InteractionRespond(i.Interaction, response)
 	if err != nil {
-		panic(err)
+		log.Printf("Error sending response: %v", err)
 	}
 }
 
@@ -137,7 +137,7 @@ func statsComponent(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 	err := s.InteractionRespond(i.Interaction, response)
 	if err != nil {
-		panic(err)
+		log.Printf("Error sending response: %v", err)
 	}
 }
 
