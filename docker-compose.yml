@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   postgres-bot:
-    image: "postgres:alpine"
+    image: "postgres:13"
     ports:
       - "5432:5432"
     environment:
