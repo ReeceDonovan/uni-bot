@@ -204,10 +204,10 @@ func createModuleStatsEmbed(moduleID string, token string) []*discordgo.MessageE
 			}
 
 			name := assignment.Name
-			if len(name) > 38 {
-				name = name[:35] + "..."
-
+			if len(name) > 35 {
+				name = name[:32] + "..."
 			}
+			name = fmt.Sprintf("%s (%.2f)", name, assignment.PointsPossible)
 			embs = append(embs, &discordgo.MessageEmbed{
 				Author: &discordgo.MessageEmbedAuthor{
 					Name: name,
