@@ -97,7 +97,7 @@ func createAssignmentList(discordUser *discordgo.User, courses *models.Courses, 
 			}
 			valid = true
 			marks := fmt.Sprintf("%.0f Marks | ", assignment.PointsPossible)
-			countdown := fmt.Sprintf("<t:%d:R>\n[%s](%s)\n\n", assignment.DueAt.Unix(), assignment.DueAt.Format("02 Jan 2006 15:04"), assignment.HTMLURL)
+			countdown := fmt.Sprintf("<t:%d:R>\n[%s](%s)\n\n", assignment.DueAt.Unix(), assignment.DueAt.Local().Format("02 Jan 2006 15:04"), assignment.HTMLURL)
 			fields := &discordgo.MessageEmbedField{
 				Name:   marks + assignment.Name,
 				Value:  countdown,
