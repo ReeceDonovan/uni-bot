@@ -23,7 +23,7 @@ func assignments(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	scope := i.ApplicationCommandData().Options[0].StringValue()
 
 	var courses *models.Courses
-	var response *discordgo.InteractionResponse
+	var response *discordgo.WebhookEdit
 
 	if scope == "server" {
 
@@ -37,14 +37,20 @@ func assignments(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			ErrorHandler(s, i, errors.New("error getting server data, make sure the server has already been linked using the /link command"))
 			return
 		}
-
-		courses = api.GetCourses(server.CanvasToken)
-
-		response = &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
+		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Embeds: createAssignmentList(discordUser, courses, server.CanvasToken),
+				Content: "Getting assignments...",
 			},
+		})
+		if err != nil {
+			log.Printf("Error responding data: %v", err)
+			ErrorHandler(s, i, errors.New("error occurred"))
+			return
+		}
+		courses = api.GetCourses(server.CanvasToken)
+		response = &discordgo.WebhookEdit{
+			Embeds: createAssignmentList(discordUser, courses, server.CanvasToken),
 		}
 
 	} else {
@@ -59,20 +65,25 @@ func assignments(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			ErrorHandler(s, i, errors.New("error getting user data, make sure the you have already linked a canvas token using the /link command"))
 			return
 		}
-
+		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "Getting assignments...",
+				Flags:   1 << 6,
+			},
+		})
+		if err != nil {
+			log.Printf("Error responding data: %v", err)
+			ErrorHandler(s, i, errors.New("error occurred"))
+			return
+		}
 		courses = api.GetCourses(user.CanvasToken)
 
-		response = &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: createAssignmentList(discordUser, courses, user.CanvasToken),
-				Flags:  1 << 6,
-			},
+		response = &discordgo.WebhookEdit{
+			Embeds: createAssignmentList(discordUser, courses, user.CanvasToken),
 		}
-
 	}
-
-	err = s.InteractionRespond(i.Interaction, response)
+	_, err = s.InteractionResponseEdit(s.State.User.ID, i.Interaction, response)
 	if err != nil {
 		log.Printf("Error responding data: %v", err)
 		ErrorHandler(s, i, errors.New("error occurred"))
