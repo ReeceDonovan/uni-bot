@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"sort"
+	"sync"
+
 	"github.com/ReeceDonovan/uni-bot/api"
 	"github.com/ReeceDonovan/uni-bot/middleware"
 	"github.com/ReeceDonovan/uni-bot/models"
@@ -66,7 +69,9 @@ func stats(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 	err = s.InteractionRespond(i.Interaction, response)
 	if err != nil {
-		log.Printf("Error sending response: %v", err)
+		log.Printf("Stats error: %v", err)
+		log.Printf("Response: %v", *response)
+		log.Printf("Interaction: %v", *i.Interaction)
 	}
 }
 
@@ -137,26 +142,59 @@ func statsComponent(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	}
 	err := s.InteractionRespond(i.Interaction, response)
 	if err != nil {
-		log.Printf("Error sending response: %v", err)
+		log.Printf("Stats component error: %v", err)
+		log.Printf("Response: %v", response)
+		log.Printf("Interaction: %v", i)
 	}
 }
 
 func createModuleStatsList(scope string, token string) *[]discordgo.MessageComponent {
-	courses := api.GetCourses(token)
+	courses := *api.GetCourses(token)
+
+	sort.Slice(courses, func(i, j int) bool {
+		return courses[i].ID < courses[j].ID
+	})
+
+	if len(courses) > 30 {
+		courses = courses[len(courses)-30:]
+	}
+
+	var validCourses []models.Course
+
+	var wg sync.WaitGroup
+	for _, course := range courses {
+		wg.Add(1)
+		go func(course models.Course) {
+			defer wg.Done()
+			assignments := api.GetAssignments(fmt.Sprintf("%v", course.ID), token)
+			for _, assignment := range *assignments {
+				if assignment.ScoreStatistics != nil && assignment.ScoreStatistics.Mean > 0 {
+					validCourses = append(validCourses, course)
+					break
+				}
+			}
+
+		}(course)
+	}
+	wg.Wait()
 
 	var moduleOptions []discordgo.SelectMenuOption
-	moduleCount := 0
-
-	for _, module := range *courses {
-		if module.Enrollments[0].ComputedCurrentScore != nil {
-			moduleCount++
-			moduleOptions = append(moduleOptions, discordgo.SelectMenuOption{
-				Label:       module.CourseCode[5:],
-				Value:       fmt.Sprintf("%s.%d", scope, module.ID),
-				Description: module.Name[12:],
-			})
-		}
+	for _, course := range validCourses {
+		moduleOptions = append(moduleOptions, discordgo.SelectMenuOption{
+			Label:       course.CourseCode[5:],
+			Value:       fmt.Sprintf("%s.%d", scope, course.ID),
+			Description: course.Name[12:],
+		})
 	}
+
+	sort.Slice(moduleOptions, func(i, j int) bool {
+		return moduleOptions[i].Label < moduleOptions[j].Label
+	})
+
+	if len(moduleOptions) > 25 {
+		moduleOptions = moduleOptions[len(moduleOptions)-25:]
+	}
+
 	return &[]discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{

@@ -53,7 +53,8 @@ func GetCourses(token string) *models.Courses {
 	tempCourses := &models.Courses{}
 	jsonErr := json.Unmarshal(res, &tempCourses)
 	if jsonErr != nil {
-		log.Println("Error parsing response: ", jsonErr)
+		log.Println("GetCourses - Error parsing response: ", jsonErr)
+		log.Println(string(res))
 	}
 	courses := models.Courses{}
 	for _, course := range *tempCourses {
@@ -69,7 +70,8 @@ func GetCourse(moduleID string, token string) (course *models.Course) {
 
 	jsonErr := json.Unmarshal(res, &course)
 	if jsonErr != nil {
-		log.Println("Error parsing response: ", jsonErr)
+		log.Println("GetCourse - Error parsing response: ", jsonErr)
+		log.Println(string(res))
 	}
 	return course
 }
@@ -79,7 +81,8 @@ func GetAssignments(moduleID string, token string) (assignments *models.Assignme
 
 	jsonErr := json.Unmarshal(res, &assignments)
 	if jsonErr != nil {
-		log.Println("Error parsing response: ", jsonErr)
+		log.Println("GetAssignments - Error parsing response: ", jsonErr)
+		log.Println(string(res))
 	}
 	return assignments
 }
